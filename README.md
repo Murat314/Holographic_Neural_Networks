@@ -56,6 +56,8 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 ├── BIB_VERIFICATION.md              # Bibliography review notes
 ├── REVISION_REPORT.md               # Revision and validation status
 ├── AGENTS.md                        # Project agent instructions
+├── LICENSE                          # Apache License 2.0 for software
+├── LICENSE-CONTENT.md               # CC BY 4.0 for paper and documentation
 ├── .gitignore                       # Generated-file exclusions
 └── README.md                        # Repository documentation
 ```
@@ -130,4 +132,11 @@ This manuscript and its supporting materials were prepared with the assistance o
 
 ## License
 
-**No license has been specified.** All rights remain reserved unless the repository owner chooses to add a license. Please open an issue for questions about reuse or contributions.
+This project uses **two open licenses** for different types of material:
+
+- **Software source code** (notably `figures/*.py` and future implementations): **[Apache License 2.0](LICENSE)**.
+- **Research paper and written materials** (including the PDF, manuscript LaTeX source, documentation, and original explanatory figures): **[Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CONTENT.md)**.
+
+You may reuse and adapt the covered materials, including commercially, **subject to the applicable license terms**, attribution requirements, and any third-party rights. The author licenses only material for which they hold the necessary rights. Consult [LICENSE-CONTENT.md](LICENSE-CONTENT.md) for the scope and attribution guidance.
+
+Copyright © 2026 Murat Durmus.
