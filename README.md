@@ -5,6 +5,11 @@
 **[Read the full paper (PDF)](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf)**  
 **[Holographic AI — An Engineer's Quick Guide](ENGINEERS_QUICK_GUIDE.md)**
 
+<!-- Upload the generated image to assets/holographic_memory_overview.png to display the graphic here. -->
+![Conceptual overview: holographic memory and a hybrid AI architecture](assets/holographic_memory_overview.png)
+
+*Illustrative overview of the proposed hybrid architecture (conceptual, not an experimentally validated implementation).*
+
 **Author:** Murat Durmus  
 **Manuscript date:** November 23, 2026  
 **Status:** Research survey / preprint; independent verification and peer review remain outstanding.
