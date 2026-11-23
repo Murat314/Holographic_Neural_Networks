@@ -25,9 +25,11 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 
 ```text
 .
-├── main.tex                  # Main LaTeX document
-├── references.bib            # Bibliography
-├── sections/                 # Seven manuscript sections
+├── Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf  # Published manuscript
+├── main.tex                         # Main LaTeX source
+├── main.bbl                         # Bibliography output included with project
+├── references.bib                   # Bibliography source
+├── sections/                        # Seven manuscript sections
 │   ├── 01_intro.tex
 │   ├── 02_math.tex
 │   ├── 03_history.tex
@@ -35,7 +37,7 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 │   ├── 05_applications.tex
 │   ├── 06_potentials.tex
 │   └── 07_conclusion.tex
-├── figures/                  # TikZ figures, data, and simulation scripts
+├── figures/                         # Figures, data, and simulation scripts
 │   ├── fig_algebra.tex
 │   ├── fig_capacity.tex
 │   ├── fig_genealogy.tex
@@ -44,11 +46,14 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 │   ├── simulate_capacity.py
 │   ├── simulate_correlated_keys.py
 │   └── README.md
-├── BIB_VERIFICATION.md       # Bibliography review notes
-└── REVISION_REPORT.md        # Revision and validation status
+├── BIB_VERIFICATION.md              # Bibliography review notes
+├── REVISION_REPORT.md               # Revision and validation status
+├── AGENTS.md                        # Project agent instructions
+├── .gitignore                       # Generated-file exclusions
+└── README.md                        # Repository documentation
 ```
 
-This is the intended **source-project layout**. See the repository file browser for the files currently published.
+The PDF uses a descriptive publication filename. **`main.tex` remains the LaTeX entry point** and should not be renamed just to match the PDF.
 
 ## Build the manuscript
 
@@ -67,7 +72,13 @@ Alternatively, if `latexmk` is installed:
 latexmk -pdf main.tex
 ```
 
-The default LaTeX build produces `main.pdf`. The version published in this repository is [`Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf`](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf).
+The default commands above produce `main.pdf` locally. To compile directly to the published filename with `latexmk`, use:
+
+```bash
+latexmk -pdf -jobname=Holographic_Neural_Networks_and_Vector_Symbolic_Architectures main.tex
+```
+
+The published document is [`Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf`](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf).
 
 ## Run simulations
 
