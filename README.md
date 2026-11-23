@@ -2,6 +2,8 @@
 
 **A Comprehensive Survey on Holographic Neural Networks, Vector Symbolic Architectures, and Their Potential in Modern AI**
 
+[![Software license: Apache 2.0](https://img.shields.io/badge/Software-Apache%202.0-blue.svg)](LICENSE) [![Paper & docs: CC BY 4.0](https://img.shields.io/badge/Paper%20%26%20Docs-CC%20BY%204.0-green.svg)](LICENSE-CONTENT.md)
+
 **[Read the full paper (PDF)](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf)**  
 **[Holographic AI — An Engineer's Quick Guide](ENGINEERS_QUICK_GUIDE.md)**
 
