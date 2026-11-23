@@ -2,6 +2,8 @@
 
 **A Comprehensive Survey on Holographic Neural Networks, Vector Symbolic Architectures, and Their Potential in Modern AI**
 
+**[Read the full paper (PDF)](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf)**
+
 **Author:** Murat Durmus  
 **Manuscript date:** November 23, 2026  
 **Status:** Research survey / preprint; independent verification and peer review remain outstanding.
@@ -65,7 +67,7 @@ Alternatively, if `latexmk` is installed:
 latexmk -pdf main.tex
 ```
 
-The compiled manuscript is `main.pdf`.
+The default LaTeX build produces `main.pdf`. The version published in this repository is [`Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf`](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf).
 
 ## Run simulations
 
@@ -90,6 +92,10 @@ This is primarily a **survey and theoretical synthesis**, not a claim of measure
 Until a formal publication record or DOI is available, cite the manuscript as:
 
 > Durmus, M. (2026). *From Optical Interference to Latent Superposition: A Comprehensive Survey on Holographic Neural Networks, Vector Symbolic Architectures, and Their Potential in Modern AI*. Research manuscript.
+
+## AI assistance disclosure
+
+This manuscript and its supporting materials were prepared with the assistance of **Gemini 4 Neon** and **GPT-6 Sol**. These AI systems supported drafting, editing, technical review, and research-project preparation. **Murat Durmus is the author and retains responsibility for the manuscript's content, mathematical claims, references, and conclusions.** AI assistance does not imply that all results have been independently verified.
 
 ## License
 
