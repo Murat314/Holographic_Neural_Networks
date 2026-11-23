@@ -94,6 +94,19 @@ python figures/simulate_correlated_keys.py
 
 The first script examines Monte Carlo crosstalk and signal-to-noise behavior under the paper's random-code assumptions. The second explores retrieval under correlated keys as a stress test; its results should not be treated as broad language-model benchmarks.
 
+## Proposed evaluation with nanoGPT
+
+A practical next step is to test the **conceptual hybrid holographic memory** from Section 6.1 using [nanoGPT](https://github.com/karpathy/nanoGPT) as a small, understandable Transformer baseline.
+
+1. **Establish a baseline:** Train and evaluate unmodified nanoGPT on synthetic key–value recall and selective-copying tasks.
+2. **Implement the memory module:** Add spectral phase-based key–value binding, a fixed-size recurrent holographic trace, and conjugate-key retrieval. Start with a standalone test of write/read correctness.
+3. **Build the hybrid variant:** Combine local sliding-window attention with holographic memory for older tokens, including a learned fusion gate and retrieval cleanup if needed.
+4. **Compare fairly:** Use the same datasets, context lengths, training-token budgets, and comparable model sizes. Report retrieval accuracy versus context length, validation loss, peak GPU/KV-memory use, tokens per second, and training stability. Include repeated random seeds and tests with correlated keys.
+
+Compare **standard nanoGPT**, a **holographic-memory variant**, and a **local-attention + holographic-memory hybrid**. Start with short synthetic sequences, then increase length and difficulty before attempting natural-language benchmarks.
+
+**Status:** This is an **evaluation plan**, not a completed nanoGPT implementation or performance claim. The repository's existing Python scripts test mathematical memory properties, not end-to-end language-model quality. Fixed-size memory has finite information capacity, so exact long-range recall may degrade as the load increases. The most useful result—positive or negative—would identify the accuracy, memory, and speed trade-offs against the baseline.
+
 ## Reproducibility and limitations
 
 The supplied revised manuscript contains embedded simulation code and a correlated-key experiment. The complete original Monte Carlo sweep was not fully reproduced during the previous review; smaller functionality checks were performed. In addition, not every bibliographic record or mathematical proof has been independently verified. Consult `REVISION_REPORT.md` and `BIB_VERIFICATION.md` before quoting validation status.
