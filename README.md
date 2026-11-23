@@ -2,7 +2,8 @@
 
 **A Comprehensive Survey on Holographic Neural Networks, Vector Symbolic Architectures, and Their Potential in Modern AI**
 
-**[Read the full paper (PDF)](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf)**
+**[Read the full paper (PDF)](Holographic_Neural_Networks_and_Vector_Symbolic_Architectures.pdf)**  
+**[Holographic AI — An Engineer's Quick Guide](ENGINEERS_QUICK_GUIDE.md)**
 
 **Author:** Murat Durmus  
 **Manuscript date:** November 23, 2026  
@@ -46,6 +47,7 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 │   ├── simulate_capacity.py
 │   ├── simulate_correlated_keys.py
 │   └── README.md
+├── ENGINEERS_QUICK_GUIDE.md          # Short, accessible engineering overview
 ├── BIB_VERIFICATION.md              # Bibliography review notes
 ├── REVISION_REPORT.md               # Revision and validation status
 ├── AGENTS.md                        # Project agent instructions
