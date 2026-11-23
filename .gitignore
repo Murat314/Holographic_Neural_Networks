@@ -1,0 +1,31 @@
+# LaTeX intermediate/build files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.blg
+*.bcf
+*.run.xml
+*.nav
+*.snm
+*.vrb
+
+# Python cache and environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+.zed/
+
+# Keep main.tex, references.bib, figures/, sections/, scripts and sources tracked.
+# main.pdf may be tracked intentionally for ease of access.
