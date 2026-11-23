@@ -1,0 +1,231 @@
+\documentclass[11pt,a4paper]{article}
+
+% ==============================================================================
+% Packages
+% ==============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,calc,backgrounds}
+
+% ==============================================================================
+% Colorblind-Safe Academic Palette (Okabe-Ito & Muted Academic Neutrals)
+% ==============================================================================
+\definecolor{okabeNavy}{HTML}{004488}
+\definecolor{okabeTeal}{HTML}{009988}
+\definecolor{okabeCoral}{HTML}{D55E00}
+\definecolor{okabeAmber}{HTML}{E69F00}
+\definecolor{okabeSky}{HTML}{56B4E9}
+\definecolor{okabePurple}{HTML}{CC79A7}
+\definecolor{okabeSlate}{HTML}{4A5568}
+\definecolor{okabeLightBg}{HTML}{F7FAFC}
+
+% Code listing style for reproducible simulation appendix
+\lstdefinestyle{holoPython}{
+    language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{okabeNavy}\bfseries,
+    commentstyle=\color{okabeTeal}\itshape,
+    stringstyle=\color{okabeCoral},
+    numberstyle=\tiny\color{okabeSlate},
+    numbers=left,
+    numbersep=8pt,
+    stepnumber=1,
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{okabeSlate!40},
+    backgroundcolor=\color{okabeLightBg},
+    breaklines=true,
+    breakatwhitespace=false,
+    columns=flexible,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=4,
+    xleftmargin=1.8em,
+    framexleftmargin=1.5em,
+    aboveskip=0.8em,
+    belowskip=0.8em
+}
+
+% Load hyperref last
+\usepackage[
+    colorlinks=true,
+    linkcolor=okabeNavy,
+    citecolor=okabeTeal,
+    urlcolor=okabeNavy,
+    pdftitle={From Optical Interference to Latent Superposition: A Comprehensive Survey on Holographic Neural Networks, Vector Symbolic Architectures, and Their Potential in Modern AI},
+    pdfauthor={Murat Durmus}
+]{hyperref}
+
+% ==============================================================================
+% Custom Mathematical Macros
+% ==============================================================================
+% Vectors and Matrices
+\newcommand{\vect}[1]{\boldsymbol{#1}}          % Bold lowercase/Greek vectors
+\newcommand{\mat}[1]{\mathbf{#1}}               % Bold uppercase matrices
+
+% Number Sets
+\newcommand{\C}{\mathbb{C}}                     % Complex numbers
+\newcommand{\R}{\mathbb{R}}                     % Real numbers
+\newcommand{\Z}{\mathbb{Z}}                     % Integers
+\newcommand{\N}{\mathbb{N}}                     % Natural numbers
+
+% Holographic / VSA Algebraic Primitives
+\newcommand{\cconv}{\circledast}                % Circular convolution (binding)
+\newcommand{\ccorr}{\star}                      % Circular correlation (unbinding)
+\newcommand{\hadamard}{\odot}                   % Hadamard / elementwise product
+\newcommand{\inv}[1]{{#1}^{\dagger}}            % Involution / approximate inverse
+\newcommand{\DFT}{\mathcal{F}}                  % Discrete Fourier Transform
+\newcommand{\IDFT}{\mathcal{F}^{-1}}            % Inverse Discrete Fourier Transform
+
+% Complex & Linear Algebra Operators
+\newcommand{\conj}[1]{\overline{#1}}            % Complex conjugate
+\newcommand{\trans}{^{\mathsf{T}}}              % Transpose
+\newcommand{\herm}{^{\mathsf{H}}}               % Hermitian (conjugate) transpose
+\newcommand{\Real}{\operatorname{Re}}           % Real part
+\newcommand{\Imag}{\operatorname{Im}}           % Imaginary part
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+
+% Probability, Signal Analysis, and Complexity
+\newcommand{\E}{\mathbb{E}}                     % Expectation
+\newcommand{\Var}{\operatorname{Var}}           % Variance
+\newcommand{\SNR}{\mathrm{SNR}}                 % Signal-to-Noise Ratio
+\newcommand{\bigo}[1]{\mathcal{O}\!\left(#1\right)}
+
+% ==============================================================================
+% Theorem Environments
+% ==============================================================================
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% ==============================================================================
+% Document Metadata
+% ==============================================================================
+\title{\textbf{From Optical Interference to Latent Superposition:}\\
+\Large A Comprehensive Survey on Holographic Neural Networks, Vector Symbolic Architectures, and Their Potential in Modern AI}
+
+\author{
+    Murat Durmus\\
+    \small\href{mailto:murat.durmus@aisoma.de}{\texttt{murat.durmus@aisoma.de}}
+}
+
+\date{\today}
+
+% ==============================================================================
+% Main Body
+% ==============================================================================
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Modern deep learning systems face intensifying computational, memory, and energy bottlenecks driven by the quadratic $\bigo{N^2}$ complexity of dense self-attention, linearly growing key--value (KV) caches during long-context inference, and brittle symbolic compositionality.
+Holographic Neural Networks (HNNs) and Vector Symbolic Architectures (VSAs)---including Holographic Reduced Representations (HRRs) and Hyperdimensional Computing (HDC)---offer a mathematically principled alternative rooted in distributed phase-space superposition.
+By encoding structured associations into fixed-dimensional complex or high-dimensional vector traces via algebraic binding (circular convolution $\cconv$ or frequency-domain Hadamard modulation $\hadamard$) and bundling, holographic representations achieve constant $\bigo{1}$ memory footprint per trace, native noise resilience, and direct physical affinity with optical and photonic interference hardware.
+
+This survey provides a unified, rigorous synthesis spanning four decades of holographic representation learning.
+First, we establish a self-contained mathematical framework over complex phasor spaces $\C^D$, deriving exact relationships between time-domain binding, Fourier-domain modulation, unbinding via circular correlation $\ccorr$, crosstalk noise $\vect{\eta}$, and capacity bounds governed by the Signal-to-Noise Ratio ($\SNR \propto D/N$).
+Second, we trace the historical genealogy connecting 1990s optical and Sutherland-style HNNs through HRR/HDC to contemporary Complex-Valued Neural Networks (CVNNs), Fourier-mixing layers, and linear State-Space Models (SSMs).
+Third, we present a systematic comparative taxonomy contrasting HNNs, HRR/HDC, Hopfield associative memories, and Transformer attention across memory complexity, training paradigms, compositionality, noise tolerance, and hardware affinity.
+Fourth, we examine current deployments in neuro-symbolic reasoning, ultra-low-power edge computing, and photonic accelerators (Mach--Zehnder interferometers and diffractive optical networks).
+Finally, we chart high-impact future research directions---including holographic $\bigo{1}$ KV-caches for long-context foundation models, hallucination-reduced symbolic-latent reasoning, continual learning resistant to catastrophic forgetting, and open scaling challenges---highlighting the promise of algorithm--hardware co-design for next-generation AI.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Holographic Neural Networks, Vector Symbolic Architectures, Holographic Reduced Representations, Hyperdimensional Computing, Complex-Valued Neural Networks, Latent Superposition, Photonic Computing, Long-Context Memory.
+
+\tableofcontents
+\newpage
+
+% ==============================================================================
+% Modular Sections
+% ==============================================================================
+\input{sections/01_intro}
+\input{sections/02_math}
+\input{sections/03_history}
+\input{sections/04_comparison}
+\input{sections/05_applications}
+\input{sections/06_potentials}
+\input{sections/07_conclusion}
+
+% ==============================================================================
+% Acknowledgments & AI Assistance Disclosure
+% ==============================================================================
+\section*{Acknowledgments \& AI Assistance Disclosure}
+\phantomsection
+\addcontentsline{toc}{section}{Acknowledgments \& AI Assistance Disclosure}
+
+This survey was produced in collaboration with Gemini 4 Neon, which provided significant support in synthesizing the academic literature, formulating the mathematical content, typesetting in LaTeX, and creating the figures. Additional technical editing, reproducibility checks, and exploratory simulation design were assisted by ChatGPT (OpenAI). The author remains responsible for independently verifying all calculations, citations, and reported results prior to submission.
+
+% ==============================================================================
+% Bibliography
+% ==============================================================================
+\bibliographystyle{plain} % Can be switched to IEEEtran, ACM-Reference-Format, etc.
+\bibliography{references}
+
+% ==============================================================================
+% Appendix A: Reproducible Monte Carlo Simulation Script
+% ==============================================================================
+\clearpage
+\appendix
+\section{Reproducible Monte Carlo Simulation Script}\label{app:simulation}
+
+To ensure this survey is fully self-contained and that the empirical discrimination $\SNR^{\mathrm{disc}}$ curves in Figure~\ref{fig:capacity}(a) (corroborating Theorem~\ref{thm:snr_capacity}) can be reproduced directly without external repository access, Listing~\ref{lst:simulate_capacity} provides the complete, verbatim Python/NumPy simulation script (\texttt{figures/simulate\_capacity.py}) used to generate \texttt{figures/capacity\_snr.dat}.
+Running \texttt{python figures/simulate\_capacity.py --seed 2026} deterministically regenerates all 17 Monte Carlo operating points across $D \in \{256, 1024, 4096\}$.
+
+\lstinputlisting[style=holoPython, caption={Reproducible Monte Carlo simulation script validating Theorem~\ref{thm:snr_capacity} and generating Figure~\ref{fig:capacity}(a).}, label={lst:simulate_capacity}]{figures/simulate_capacity.py}
+
+
+\clearpage
+\section{Exploratory Correlated-Key Retrieval Stress Test}\label{app:correlated}
+The exact FHRR crosstalk analysis in Theorem~\ref{thm:snr_capacity} assumes mutually independent uniform-phase keys and values. To probe one failure mode outside this regime, we additionally evaluate a controlled family of \emph{correlated} keys $K_{n,\omega}=\exp(i(\phi_\omega+\epsilon_{n,\omega}))$, where a random anchor $\phi_\omega$ is shared across the $N$ keys and $\epsilon_{n,\omega}\sim\mathcal N(0,\sigma^2)$. Value vectors remain independent uniform-phase phasors. Each trace is queried using its first stored key; the clean-up dictionary contains all $N$ stored values (not just one independent, unstored distractor). The test uses $D=256$, 500 independent trials per condition and random seed 2026. Results are exploratory estimates, not theoretical guarantees.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Correlated-key FHRR stress test. Key similarity is mean normalized real overlap between the first two keys; top-1 recall selects among all $N$ stored values. The margin is target score minus largest competing score (negative implies frequent collision).}
+\label{tab:correlated_keys}
+\begin{tabular}{rrrrr}
+\toprule
+$N$ & Phase noise $\sigma$ & Mean key similarity & Top-1 recall & Mean margin \\
+\midrule
+8 & 0.30 & 0.913 & 0.314 & -0.072 \\
+8 & 1.00 & 0.368 & 1.000 & 0.471 \\
+8 & 3.00 & -0.003 & 1.000 & 0.835 \\
+32 & 0.30 & 0.914 & 0.076 & -0.402 \\
+32 & 1.00 & 0.365 & 0.706 & 0.132 \\
+32 & 3.00 & -0.002 & 0.962 & 0.496 \\
+64 & 0.30 & 0.914 & 0.026 & -0.716 \\
+64 & 1.00 & 0.368 & 0.348 & -0.161 \\
+64 & 3.00 & -0.000 & 0.666 & 0.167 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Strongly correlated keys can defeat reliable discrimination despite fixed-dimensional state size: at $N=32$, the observed top-1 retrieval rate falls from 96.2\% for nearly uncorrelated keys ($\sigma=3$) to 7.6\% for highly correlated keys ($\sigma=0.3$). Unlike the independent-random-codebook setting, the retrieval score for competing stored values now depends on the key--key correlations. The reported accuracies are sensitive to the selected $D$, $N$, noise distribution and clean-up codebook; they do \emph{not} predict downstream language-model performance. The following standalone source reproduces the experiment and prints all nine operating points.
+
+\lstinputlisting[style=holoPython, caption={Exploratory correlated-key stress test; run \texttt{python figures/simulate\_correlated\_keys.py}.}, label={lst:correlated_keys}]{figures/simulate_correlated_keys.py}
+
+\end{document}

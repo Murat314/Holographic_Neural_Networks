@@ -1,0 +1,151 @@
+\section{Historical Evolution and Architectural Taxonomy}\label{sec:history}
+
+The mathematical principles formalized in Section~\ref{sec:math} did not emerge in isolation; they evolved across nearly eight decades of cross-pollination among optical physics, cognitive neuroscience, connectionist artificial intelligence, and modern deep sequence modeling.
+Figure~\ref{fig:genealogy} maps this intellectual lineage across three historical waves---from 1990s complex-valued Holographic Neural Networks, through algebraic Vector Symbolic Architectures, to contemporary spectral layers and State-Space Models---revealing a deep structural convergence beneath seemingly disparate model families.
+
+\begin{figure}[tbp]
+    \centering
+    \input{figures/fig_genealogy}
+    \caption{Historical and architectural genealogy of holographic neural computation. Solid arrows denote direct mathematical or algorithmic inheritance; dashed arrows highlight cross-era physical and architectural bridges linking optical holography to photonic accelerators (Section~\ref{sec:applications}) and classical Hopfield attractors to modern softmax attention (Section~\ref{sec:comparison}).}
+    \label{fig:genealogy}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\subsection{First Wave: Optical Analogies and 1990s Holographic Neural Networks}\label{sec:history:hnn}
+% ------------------------------------------------------------------------------
+
+\subsubsection{Optical and Associative Memory Precursors}
+
+The conceptual genesis of holographic computation traces to Dennis Gabor's invention of optical holography~\cite{GABOR_1948_HOLOGRAPHY}, which demonstrated that a coherent wave field can record both the amplitude and relative phase of an object across an entire physical interference plate.
+Because information is distributed globally across the interference pattern, illuminating even a fractured sub-region of the hologram with the original reference beam reconstructs the entire stored image with gracefully degraded resolution rather than localized erasure.
+Two decades later, Longuet-Higgins translated this physical mechanism into a mathematical model of temporal associative recall---the \emph{holophone}~\cite{LONGUET_HIGGINS_1968_HOLOPHONE}---showing that linear correlation filters in the frequency domain could store and replay overlapping temporal sequences without dedicated memory slots.
+
+In parallel, connectionist researchers developed matrix-based distributed associative memories, culminating in Hopfield's seminal energy-based attractor network~\cite{HOPFIELD_1982_ASSOCIATIVE}.
+A classical Hopfield network stores $N$ bipolar patterns $\{\vect{\xi}_n\}_{n=1}^{N} \subset \{-1, +1\}^D$ inside a symmetric Hebbian outer-product weight matrix $\mat{W} = \frac{1}{D}\sum_{n=1}^{N} \vect{\xi}_n \vect{\xi}_n\trans$ and retrieves corrupted inputs via iterative sign updates minimizing $E(\vect{x}) = -\frac{1}{2}\vect{x}\trans \mat{W} \vect{x}$.
+Although Hopfield networks are real-valued and auto-associative rather than complex phase-encoded, their outer-product superposition exhibits the exact crosstalk-limited linear capacity scaling ($N_{\max} \approx 0.138 D$ for uncorrelated patterns) that characterizes all bilinear holographic memories.
+
+\subsubsection{Sutherland's Holographic Neural Network (HNN)}
+
+In the early 1990s, John Sutherland synthesized optical phase interference with neural associative learning in the \emph{Holographic Neural Network (HNN)}~\cite{SUTHERLAND_1990_HNN}.
+Rather than mapping scalar features through real-valued hidden layers trained by gradient descent, Sutherland's HNN embeds continuous real-valued stimulus vectors $\vect{s} \in \R^{D_s}$ directly onto the complex unit circle via a smooth sigmoidal phase transformation,
+\begin{equation}\label{eq:sutherland_encoding}
+    k_j = \lambda_j \exp\!\left(i \theta_j\right), \qquad
+    \theta_j = 2\pi \sigma\!\left(\frac{s_j - \mu_j}{\tau_j}\right), \qquad
+    \lambda_j \in [0, 1],
+\end{equation}
+where $\sigma(\cdot)$ denotes the logistic sigmoid (centering the empirical distribution of $s_j$ near zero phase to maximize angular spread across $[-\pi, \pi)$) and $\lambda_j$ encodes stimulus confidence.
+Target responses $\vect{v} \in \C^{D_v}$ are phase-encoded analogously.
+
+Sutherland's HNN enfolds a dataset of $N$ stimulus--response associations $\{(\vect{k}_n, \vect{v}_n)\}_{n=1}^N$ into a single complex correlation matrix $\mat{X} \in \C^{D_v \times D_k}$ via non-iterative (one-shot) Hebbian accumulation, $\mat{X} = \sum_{n=1}^{N} \vect{v}_n \vect{k}_n\herm$, as introduced in Remark~\ref{rem:sutherland_matrix}.
+When real-world stimuli exhibit non-zero correlations ($\inner{\vect{k}_n}{\vect{k}_q} \neq 0$), one-shot enfolding accumulates systematic bias; Sutherland therefore introduced an iterative error-correcting \emph{enhanced learning} rule (a complex-valued Widrow--Hoff / Delta update),
+\begin{equation}\label{eq:sutherland_delta}
+    \mat{X}^{(t+1)} = \mat{X}^{(t)} + \eta_t\left(\vect{v}_n - \frac{1}{c_n}\mat{X}^{(t)}\vect{k}_n\right)\vect{k}_n\herm,
+    \qquad c_n = \sum_{j=0}^{D_k - 1} \lambda_{n,j},
+\end{equation}
+which orthogonalizes interfering patterns across passes while remaining strictly local and linear in $\mat{X}$ (reducing at $\eta_0 = 1$, $\mat{X}^{(0)} = \mat{0}$ to one-shot accumulation $\mat{X} = \sum_n \vect{v}_n \vect{k}_n\herm$ with normalized recall $\hat{\vect{v}}_n = c_n^{-1}\mat{X}\vect{k}_n$ matching~\eqref{eq:sutherland_recall} on $\mathbb{T}^{D_k}$, or equivalently placing $c_n^{-1}$ outside the parentheses when $\mat{X}$ absorbs normalization for unnormalized readout $\mat{X}\vect{k}_n$).
+To capture nonlinear decision boundaries without deep backpropagation, Sutherland further augmented the input vector with \emph{higher-order phase products}---explicitly constructing composite phasors $\prod_{r \in \mathcal{I}} \lambda_r e^{i\theta_r}$ for index subsets $\mathcal{I}$ of order $p \ge 2$---thereby lifting the stimulus into a higher-dimensional feature space $\C^{D'}$ ($D' \gg D_s$) where both nonlinear expressivity and superposition capacity scale with $D'$.
+
+Despite demonstrating rapid one-shot learning, real-time control, and high fault tolerance in early industrial benchmarks, first-wave HNNs receded from mainstream machine learning during the late 1990s and 2000s.
+Their reliance on hand-engineered polynomial phase expansions scaled combinatorially with raw sensory dimensionality, and unlike deep multilayer networks trained with stochastic gradient descent, shallow correlation matrices lacked a mechanism for learning hierarchical, invariant feature representations from raw pixels or natural language.
+
+% ------------------------------------------------------------------------------
+\subsection{Second Wave: Vector Symbolic Architectures (HRR and HDC)}\label{sec:history:vsa}
+% ------------------------------------------------------------------------------
+
+While Sutherland targeted continuous-valued associative mapping, a parallel community in cognitive science and symbolic AI confronted the \emph{binding problem}: how distributed neural vectors can represent structured, compositional objects---such as nested trees, predicate--argument tuples, and variable bindings---without suffering the superposition catastrophe (conflating ``red square + blue circle'' with ``red circle + blue square'').
+
+\subsubsection{From Tensor Products to Plate's Holographic Reduced Representations}
+
+Paul Smolensky first showed that variable binding in connectionist spaces can be realized cleanly via \emph{Tensor Product Representations (TPRs)}~\cite{SMOLENSKY_1990_TPR}, representing a set of role--filler bindings as $\mat{T} = \sum_{n=1}^{N} \vect{r}_n \otimes \vect{f}_n \in \R^{D \times D}$.
+However, recursively binding a composite structure to a higher-level role increases tensor rank at every level of nesting, causing storage complexity to explode exponentially as $\bigo{D^r}$ for depth-$r$ trees.
+
+Tony Plate resolved this dimensionality explosion in 1995 with \emph{Holographic Reduced Representations (HRRs)}~\cite{PLATE_1995_HRR}.
+Plate observed that circular convolution $\vect{r} \cconv \vect{f} \in \R^D$ is precisely the \emph{compressed anti-diagonal projection} of the unconjugated outer-product tensor $\vect{r} \otimes \vect{f}$: summing entries $(a,b)$ along wrapped anti-diagonals $(a + b) \bmod D = j$ collapses a rank-2 tensor back into $\R^D$ (whereas summing along wrapped main diagonals $(a - b) \bmod D = j$, as on the Hermitian correlation matrix~\eqref{eq:hnn_corr_matrix}, yields circular correlation $\vect{k} \ccorr \vect{v} = \inv{\vect{k}} \cconv \vect{v}$).
+Because the output resides in the exact same ambient space as its operands, HRRs permit arbitrary recursive nesting at constant width $D$: for example, a structured proposition $\texttt{eat}(\texttt{agent}{=}\texttt{dog}, \texttt{object}{=}\texttt{bone})$ can be encoded recursively as
+\begin{equation}\label{eq:hrr_recursive}
+    \vect{p} = \vect{r}_{\mathrm{pred}} \cconv \vect{f}_{\mathrm{eat}}
+             + \vect{r}_{\mathrm{agent}} \cconv \vect{f}_{\mathrm{dog}}
+             + \vect{r}_{\mathrm{obj}} \cconv \vect{f}_{\mathrm{bone}} \in \R^D,
+\end{equation}
+and subsequently bound as a filler inside an outer sentence vector without expanding dimensionality.
+Plate further formalized the clean-up memory required to strip crosstalk noise after circular-correlation unbinding ($\ccorr$), proved the foundational variance bounds analyzed in Section~\ref{sec:math:capacity}, and introduced complex-valued \emph{Fourier HRR (FHRR)} on $\mathbb{T}^D$ to eliminate spectral self-distortion and accelerate binding to $\bigo{D}$ elementwise phase addition.
+More recently, Generalized HRRs (GHRRs)~\cite{YEUNG_2024_GHRR} lifted scalar FHRR phasors in $\mathbb{T}^D$ to $m \times m$ unitary matrix elements in $U(m)^D$, enabling natively non-commutative binding and flexible similarity kernels while recovering standard FHRR at $m=1$.
+Bridging these second-wave algebras directly into deep sequence modeling, Alam et al.~\cite{HOLOGRAPHIC_ATTENTION_OR_KV_CACHE} recast Transformer self-attention via compressive HRR binding and unbinding to reduce attention complexity to linear-in-$N$ superposition traces.
+
+\subsubsection{Kanerva's Hyperdimensional Computing and VSA Unification}
+
+Building on sparse distributed memory and random-projection geometry, Pentti Kanerva articulated \emph{Hyperdimensional Computing (HDC)}~\cite{KANERVA_2009_HDC}, emphasizing ultra-high-dimensional ($D \sim 10^4$) random binary or bipolar \emph{hypervectors} ($\{0, 1\}^D$ or $\{-1, +1\}^D$).
+In addition to elementwise binding ($\hadamard$ or XOR) and majority-vote/additive bundling, Kanerva highlighted a third primitive---invertible coordinate \emph{permutation} $\rho: \R^D \to \R^D$ (typically a cyclic shift)---to break the commutativity of binding and encode ordered sequences, $n$-grams, and temporal trajectories:
+\begin{equation}\label{eq:hdc_sequence}
+    \vect{s}_{1:L} = \sum_{t=1}^{L} \rho^{L - t}\!\left(\vect{x}_t\right)
+    \qquad\text{or}\qquad
+    \vect{g}_{1:L} = \bigodot_{t=1}^{L} \rho^{L - t}\!\left(\vect{x}_t\right).
+\end{equation}
+Kanerva demonstrated that holistic algebraic analogies (such as solving ``What is the Dollar of Mexico?'' by unbinding $\vect{k}_{\mathrm{USA}}$ and rebinding $\vect{k}_{\mathrm{Mexico}}$ across bundled country records) execute in a single constant-time parallel vector operation without explicit symbolic search trees.
+
+Subsequent surveys by Schlegel et al.~\cite{SCHLEGEL_VSA_COMPARISON} and Kleyko et al.~\cite{KLEYKO_VSA_SURVEY} unified HRR, FHRR, HDC, Multiply--Add--Permute (MAP), Binary Spatter Codes (BSC), and Sparse Binary Distributed Representations under the umbrella term \emph{Vector Symbolic Architectures (VSAs)}.
+Across this taxonomy, every VSA is uniquely characterized by four design choices: (1) ambient vector space and atomic distribution ($\{0,1\}^D$, $\{-1,+1\}^D$, $\R^D$, or $\mathbb{T}^D$); (2) binding algebra and whether unbinding is exact (e.g., XOR, MAP, FHRR) or approximate (real Gaussian HRR); (3) bundling linearity vs.\ clipping/phase-projection; and (4) clean-up mechanism (linear codebook matching, Hopfield attractors, or multi-factor resonator networks).
+
+% ------------------------------------------------------------------------------
+\subsection{Third Wave: Spectral Mixing, Complex Deep Learning, and State-Space Models}\label{sec:history:modern}
+% ------------------------------------------------------------------------------
+
+Over the past decade, deep learning architectures designed for scalability and long-sequence stability have independently rediscovered---and scaled via end-to-end backpropagation---each core mathematical ingredient of holographic computation.
+
+\subsubsection{Complex-Valued Neural Networks (CVNNs) and Unitary Recurrences}
+
+Modern Complex-Valued Neural Networks~\cite{BASSEY_CVNN_SURVEY,TRABELSI_2018_DCN} extend deep convolutional, residual, and attention layers natively into $\C^D$.
+Because Liouville's theorem prohibits non-constant bounded holomorphic activations on $\C$, CVNNs rely on \emph{Wirtinger ($\C\R$) calculus} to optimize real-valued objective functions $\mathcal{L}(\vect{z}, \conj{\vect{z}}) \in \R$ with respect to complex weights $\vect{z} = \vect{x} + i\vect{y}$ via the conjugate gradient
+\begin{equation}\label{eq:wirtinger}
+    \nabla_{\conj{\vect{z}}} \mathcal{L}
+    \coloneqq \frac{\partial \mathcal{L}}{\partial \conj{\vect{z}}}
+    = \frac{1}{2}\left(\frac{\partial \mathcal{L}}{\partial \vect{x}} + i\frac{\partial \mathcal{L}}{\partial \vect{y}}\right),
+\end{equation}
+paired with split or phase-preserving nonlinearities such as $\C$ReLU (applying ReLU separately to real and imaginary parts) and $\mathrm{modReLU}(z) = \mathrm{ReLU}(\abs{z} + b)\frac{z}{\abs{z}}$ (which preserves phase angle $\theta$ identically while gating magnitude $\lambda$).
+Closely aligned with unitary holographic binding, \emph{Unitary Evolution Recurrent Neural Networks (uRNNs)}~\cite{ARJOVSKY_2016_URNN} parameterize recurrent transitions as products of complex diagonal phase matrices, FFT/IFFT blocks, and Householder reflections so that $\mat{U}\herm \mat{U} = \mat{I}_D$.
+Because unitary operators preserve Euclidean norm exactly ($\norm{\mat{U}\vect{h}}_2 = \norm{\vect{h}}_2$), uRNNs eliminate exploding and vanishing gradients over long horizons purely through complex phase interference---bridging Sutherland's phase-space formulation with deep recurrent optimization.
+
+\subsubsection{Fourier Token Mixing and Spectral Convolutions}
+
+A second point of convergence emerged in efforts to replace quadratic $\bigo{N^2}$ Transformer self-attention~\cite{VASWANI_TRANSFORMER} with sub-quadratic spectral mixing.
+FNet~\cite{LEE_THORP_FNET} replaces the multi-head self-attention sublayer entirely with an unparameterized two-dimensional Discrete Fourier Transform across the sequence and hidden dimensions,
+\begin{equation}\label{eq:fnet}
+    \mat{Y} = \Real\!\left(\DFT_{\mathrm{seq}}\!\left(\DFT_{\mathrm{hidden}}(\mat{H})\right)\right),
+\end{equation}
+achieving $\bigo{N \log N}$ token mixing while retaining competitive downstream accuracy on natural-language benchmarks at a fraction of the computational cost.
+Subsequent global-filter and FFT long-convolution models generalize~\eqref{eq:fnet} by introducing learnable frequency-domain filters $\vect{W}_\omega \in \C^D$, computing $\IDFT(\vect{W} \hadamard \DFT(\vect{x}))$ across sequence positions.
+By the Circular Convolution Theorem (Proposition~\ref{prop:conv_thm}), every such spectral mixing layer is algebraically equivalent to circular-convolution holographic binding between input representations and a learned kernel, executed in $\bigo{N \log N}$ time via FFT.
+
+\subsubsection{Linear Attention, State-Space Models, and Modern Hopfield Networks}
+
+Most remarkably, modern sub-quadratic sequence models have converged directly onto the exact mathematical form of holographic associative superposition.
+Katharopoulos et al.~\cite{KATHAROPOULOS_2020_LINEAR_TRANSFORMER} showed that replacing the exponential softmax kernel in Transformer attention with a separable positive feature map $\phi(\cdot)$ rewrites causal attention as a recurrent fixed-size associative matrix,
+\begin{equation}\label{eq:linear_attn_state}
+    \mat{S}_t = \mat{S}_{t-1} + \vect{v}_t \phi(\vect{k}_t)\trans,
+    \qquad
+    \hat{\vect{v}}_t = \frac{\mat{S}_t \phi(\vect{q}_t)}{\vect{z}_t\trans \phi(\vect{q}_t)},
+\end{equation}
+where $\vect{z}_t = \sum_{\tau=1}^{t} \phi(\vect{k}_\tau)$ normalizes the readout.
+Comparing~\eqref{eq:linear_attn_state} with Sutherland's complex correlation matrix~\eqref{eq:sutherland_recall} reveals an exact structural isomorphism: linear attention is a real-valued, end-to-end learned holographic outer-product memory whose fixed state size $\bigo{D^2}$ suffers precisely from the crosstalk saturation analyzed in Section~\ref{sec:math:capacity}.
+
+Structured and Selective State-Space Models (S4 and Mamba)~\cite{GU_SSM_S4_MAMBA} resolve the static saturation of unbounded additive traces by introducing continuous-time (frequently complex-diagonalized) dynamics and input-dependent forgetting gates:
+\begin{equation}\label{eq:ssm_recurrence}
+    \mat{S}_t = \mat{A}_t \mat{S}_{t-1} + \vect{B}_t \vect{x}_t,
+    \qquad
+    \vect{y}_t = \mat{C}_t \mat{S}_t,
+\end{equation}
+where $\mat{A}_t$ selectively decays stale superposed bindings to preserve $\SNR$ for salient recent or key-matched information---the continuous, learned counterpart to weighted holographic bundling~\eqref{eq:bundling} and Sutherland's delta-rule interference suppression~\eqref{eq:sutherland_delta}.
+Extending this matrix-state lineage, DeltaNet~\cite{YANG_2024_DELTANET} and Gated DeltaNet~\cite{YANG_2025_GATED_DELTANET} scale Sutherland's error-correcting delta rule~\eqref{eq:sutherland_delta} into chunkwise hardware-efficient linear Transformers, combining rank-one key--value erasure with selective decay to actively suppress cross-key interference.
+In parallel, frontier hybrid models---exemplified by Griffin~\cite{DE_2024_GRIFFIN} (interleaving gated linear recurrences with local sliding-window attention) and Titans~\cite{BEHROUZ_2025_TITANS} (pairing local exact attention with a deep neural long-term memory updated at test time via surprise-driven gradient descent)---operationalize the exact division of labor between fixed-state compression and exact local recall.
+In stark contrast to this fixed-size parametric superposition lineage, Ramsauer et al.~\cite{RAMSAUER_MODERN_HOPFIELD} proved that lifting Hopfield's classical quadratic energy to a continuous log-sum-exp energy yields an associative memory with \emph{exponential} pattern storage capacity whose single-step update is mathematically identical to Transformer scaled dot-product softmax attention~\cite{VASWANI_TRANSFORMER}---at the unavoidable cost of retaining every stored pattern explicitly in $\bigo{ND}$ memory.
+
+% ------------------------------------------------------------------------------
+\subsection{Unifying Architectural Perspective}\label{sec:history:synthesis}
+% ------------------------------------------------------------------------------
+
+Viewing all three waves through the mathematical lens of Section~\ref{sec:math} exposes a clean architectural bifurcation across modern AI:
+\begin{itemize}
+    \item \emph{Parametric holographic superposition} (Sutherland HNNs, HRR/FHRR, HDC, linear attention, and SSMs) compresses unbounded histories into a constant-size latent state ($\bigo{D}$ for vector binding or $\bigo{D^2}$ for outer-product matrices), delivering $\bigo{1}$ per-step inference memory and native phase/hardware affinity at the cost of additive crosstalk governed by $\SNR \propto D/N$.
+    \item \emph{Non-parametric explicit attention} (Modern Hopfield Networks and softmax Transformers) avoids crosstalk by retaining all $N$ keys and values explicitly ($\bigo{ND}$ memory and $\bigo{N^2}$ pairwise interaction), enabling exact verbatim recall at severe long-context memory and energy overhead.
+\end{itemize}
+This dichotomy forms the analytical foundation for the systematic multi-axis comparison in Section~\ref{sec:comparison} and motivates the hybrid holographic--attention architectures examined in Section~\ref{sec:potentials}.

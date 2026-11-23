@@ -1,0 +1,198 @@
+% ==============================================================================
+% figures/fig_genealogy.tex
+% Historical & Architectural Genealogy (TikZ 4-tier chronological DAG)
+% Traces evolution from Optical Holography & 1990s HNNs -> HRR/HDC -> Modern
+% CVNNs, Spectral Mixing, SSMs, & Modern Hopfield -> Emerging Hybrid Frontier.
+% Requires TikZ libraries: positioning, arrows.meta, shapes.geometric, fit,
+% calc, backgrounds; and Okabe-Ito colors + math macros from main.tex.
+% ==============================================================================
+\begin{tikzpicture}[
+    >=Stealth,
+    node distance=0.85cm and 0.48cm,
+    every node/.style={font=\footnotesize},
+    gennode/.style={
+        rectangle,
+        rounded corners=3pt,
+        line width=0.8pt,
+        align=center,
+        inner sep=4.5pt,
+        minimum height=1.18cm
+    },
+    wave1/.style={
+        gennode,
+        draw=okabeNavy,
+        fill=okabeNavy!7,
+        text width=3.95cm
+    },
+    wave2/.style={
+        gennode,
+        draw=okabeTeal,
+        fill=okabeTeal!8,
+        text width=5.95cm
+    },
+    wave3/.style={
+        gennode,
+        draw=okabeAmber!85!black,
+        fill=okabeAmber!10,
+        text width=3.02cm
+    },
+    wave3alt/.style={
+        gennode,
+        draw=okabeCoral,
+        fill=okabeCoral!8,
+        text width=3.02cm
+    },
+    frontier/.style={
+        gennode,
+        draw=okabePurple!85!black,
+        fill=okabePurple!10,
+        text width=6.15cm
+    },
+    edgeflow/.style={
+        ->,
+        line width=0.8pt,
+        draw=okabeSlate!85
+    },
+    crossflow/.style={
+        ->,
+        line width=0.75pt,
+        dashed,
+        draw=okabeSlate!70
+    },
+    eraband/.style={
+        rounded corners=5pt,
+        dashed,
+        line width=0.65pt,
+        inner sep=6pt
+    }
+]
+
+% ==============================================================================
+% TIER 1: FOUNDATIONS & WAVE 1 (1948 -- 1990s)
+% ==============================================================================
+\node[wave1] (sutherland) {%
+    \textbf{\color{okabeNavy}Sutherland HNN (1990s)}\\[1.5pt]
+    {\scriptsize Phasors $\lambda e^{i\theta} \in \C^D$; one-shot\\
+    correlation $\mat{X}=\sum \vect{v}_n\vect{k}_n\herm$}%
+};
+
+\node[wave1, left=0.55cm of sutherland] (optics) {%
+    \textbf{\color{okabeNavy}Optical Holography (1948--68)}\\[1.5pt]
+    {\scriptsize Gabor wave interference;\\
+    Longuet-Higgins holophone}%
+};
+
+\node[wave1, right=0.55cm of sutherland] (hopfield) {%
+    \textbf{\color{okabeNavy}Hopfield (1982) \& TPR (1990)}\\[1.5pt]
+    {\scriptsize Energy attractors ($\bigo{D^2}$);\\
+    Smolensky tensor binding $\vect{r}\otimes\vect{f}$}%
+};
+
+% ==============================================================================
+% TIER 2: WAVE 2 -- ALGEBRAIC VECTOR SYMBOLIC ARCHITECTURES (1995 -- 2010s)
+% ==============================================================================
+\coordinate (t1_left_mid) at ($(optics.south)!0.48!(sutherland.south)$);
+\node[wave2, below=0.95cm of t1_left_mid] (hrr) {%
+    \textbf{\color{okabeTeal}Plate's HRR \& FHRR (1995--2003)}\\[1.5pt]
+    {\scriptsize Fixed-$D$ binding ($\cconv \leftrightarrow \hadamard$ on $\mathbb{T}^D$), correlation $\ccorr$,\\
+    clean-up memory, recursive symbolic structures}%
+};
+
+\node[wave2, right=0.65cm of hrr] (hdc) {%
+    \textbf{\color{okabeTeal}Kanerva's HDC \& VSA Taxonomy (2009--)}\\[1.5pt]
+    {\scriptsize High-$D$ ($10^4$) binary/bipolar hypervectors (MAP/BSC),\\
+    permutation sequences, fault-tolerant bitwise ops}%
+};
+
+% ==============================================================================
+% TIER 3: WAVE 3 -- MODERN DEEP LEARNING CONVERGENCE (2016 -- PRESENT)
+% ==============================================================================
+\node[wave3, below=1.05cm of hrr, xshift=-1.75cm] (cvnn) {%
+    \textbf{\color{okabeAmber!75!black}CVNNs \& uRNNs}\\[1.5pt]
+    {\scriptsize Wirtinger $\nabla$, $\C$-act.,\\
+    unitary $\mat{U}\herm\mat{U}=\mat{I}$}%
+};
+
+\node[wave3, right=0.45cm of cvnn] (spectral) {%
+    \textbf{\color{okabeAmber!75!black}Spectral Mixing}\\[1.5pt]
+    {\scriptsize FNet 2D DFT; FFT\\
+    long convolutions}%
+};
+
+\node[wave3, right=0.45cm of spectral] (ssm) {%
+    \textbf{\color{okabeAmber!75!black}Linear Attn.\ \& SSMs}\\[1.5pt]
+    {\scriptsize S4/Mamba gated state\\
+    $\mat{S}_t{=}\mat{A}_t\mat{S}_{t-1}{+}\vect{v}_t\vect{k}_t\herm$}%
+};
+
+\node[wave3alt, right=0.45cm of ssm] (modhop) {%
+    \textbf{\color{okabeCoral}Modern Hopfield}\\[1.5pt]
+    {\scriptsize Exp.\ energy $\equiv$ softmax\\
+    attention ($\bigo{ND}$)}%
+};
+
+% ==============================================================================
+% TIER 4: EMERGING FRONTIER (SECTIONS 5 -- 6)
+% ==============================================================================
+\coordinate (t3_left_mid) at ($(cvnn.south)!0.5!(spectral.south)$);
+\node[frontier, below=1.0cm of t3_left_mid] (photonics) {%
+    \textbf{\color{okabePurple!80!black}Photonic \& Edge Hardware Co-Design (Sec.~\ref{sec:applications})}\\[1.5pt]
+    {\scriptsize MZI unitary meshes, diffractive $\text{D}^2\text{NN}$, in-memory RRAM/ASIC HDC}%
+};
+
+\coordinate (t3_right_mid) at ($(ssm.south)!0.5!(modhop.south)$);
+\node[frontier, below=1.0cm of t3_right_mid] (hybrid) {%
+    \textbf{\color{okabePurple!80!black}Hybrid Holographic Foundation Models (Sec.~\ref{sec:potentials})}\\[1.5pt]
+    {\scriptsize $\bigo{1}$ holographic KV-caches, neuro-symbolic binding, continual superposition}%
+};
+
+% ==============================================================================
+% DIRECTED LINEAGE EDGES
+% ==============================================================================
+% Tier 1 -> Tier 1 / Tier 2
+\draw[edgeflow] (optics.east) -- (sutherland.west);
+\draw[edgeflow] (optics.south) -- ++(0,-0.25) -| ([xshift=-1.4cm]hrr.north);
+\draw[edgeflow] (sutherland.south) -- ++(0,-0.25) -| ([xshift=0.9cm]hrr.north);
+\draw[edgeflow] (hopfield.south) -- ++(0,-0.25) -| ([xshift=1.2cm]hrr.north);
+\draw[edgeflow] (hopfield.south) -- ++(0,-0.25) -| ([xshift=-0.8cm]hdc.north);
+
+% Horizontal VSA synergy
+\draw[<->, okabeTeal, line width=0.8pt] (hrr.east) -- (hdc.west);
+
+% Tier 1/2 -> Tier 3
+\draw[edgeflow] (sutherland.south) -- ++(0,-0.25) -| ([xshift=-0.2cm]cvnn.north);
+\draw[edgeflow] (hrr.south) -- ++(0,-0.32) -| (spectral.north);
+\draw[edgeflow] (hrr.south) -- ++(0,-0.32) -| ([xshift=-0.45cm]ssm.north);
+\draw[edgeflow] (hdc.south) -- ++(0,-0.32) -| ([xshift=0.45cm]ssm.north);
+\draw[crossflow] (hopfield.east) -- ++(0.35,0) |- (modhop.east);
+
+% Tier 3 -> Tier 4
+\draw[edgeflow] (cvnn.south) -- ++(0,-0.32) -| ([xshift=-1.5cm]photonics.north);
+\draw[edgeflow] (spectral.south) -- ++(0,-0.32) -| ([xshift=0.8cm]photonics.north);
+\draw[edgeflow] (spectral.south) -- ++(0,-0.32) -| ([xshift=-1.8cm]hybrid.north);
+\draw[edgeflow] (ssm.south) -- ++(0,-0.32) -| ([xshift=-0.4cm]hybrid.north);
+\draw[edgeflow] (modhop.south) -- ++(0,-0.32) -| ([xshift=1.4cm]hybrid.north);
+
+% Direct optical & edge heritage into Tier 4 (routed cleanly outside left margin)
+\draw[crossflow] (optics.west) -- ++(-0.35,0) |- (photonics.west);
+\draw[crossflow] (hdc.south) -- ++(0,-0.32) -| ([xshift=2.2cm]photonics.north);
+
+% ==============================================================================
+% BACKGROUND ERA BANDS
+% ==============================================================================
+\begin{scope}[on background layer]
+    \node[eraband, draw=okabeNavy!40, fill=okabeLightBg,
+          fit=(optics)(sutherland)(hopfield),
+          label={[anchor=south west, font=\scriptsize\bfseries, text=okabeNavy]north west:Wave 1: Optical Holography, Classical Associative Memories, \& 1990s HNNs}] {};
+    \node[eraband, draw=okabeTeal!45, fill=okabeLightBg,
+          fit=(hrr)(hdc),
+          label={[anchor=south west, font=\scriptsize\bfseries, text=okabeTeal!85!black]north west:Wave 2: Vector Symbolic Architectures (HRR / FHRR \& Hyperdimensional Computing)}] {};
+    \node[eraband, draw=okabeAmber!55!black, fill=okabeLightBg,
+          fit=(cvnn)(spectral)(ssm)(modhop),
+          label={[anchor=south west, font=\scriptsize\bfseries, text=okabeAmber!75!black]north west:Wave 3: Complex Deep Learning, Spectral Mixing, State-Space Recurrences, \& Softmax Attention}] {};
+    \node[eraband, draw=okabePurple!55!black, fill=okabeLightBg,
+          fit=(photonics)(hybrid),
+          label={[anchor=south west, font=\scriptsize\bfseries, text=okabePurple!80!black]north west:Emerging Convergence: Algorithm--Hardware Co-Design \& Hybrid Foundation Models}] {};
+\end{scope}
+
+\end{tikzpicture}

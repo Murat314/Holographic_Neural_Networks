@@ -1,0 +1,171 @@
+\section{Comparative Analysis of Memory and Attention Paradigms}\label{sec:comparison}
+
+Having established the algebraic foundations of phase-space superposition and traced the historical lineage from optical holography and Sutherland's Holographic Neural Networks (HNNs) through Vector Symbolic Architectures (VSAs) to contemporary Complex-Valued Neural Networks (CVNNs), Fourier mixing, and State-Space Models (SSMs), we now situate holographic representations within the broader landscape of neural associative memory and sequence-modeling architectures.
+A persistent obstacle to cross-pollination between the VSA/HNN community and mainstream deep learning has been the lack of a unified analytical vocabulary: mechanisms that appear distinct at the implementation level---such as complex correlation matrices, circular-convolution memory traces, Hopfield energy landscapes, and Transformer key--value caches---often represent different operating points along a single mathematical trade-off between \emph{parametric compression} and \emph{non-parametric retention}.
+In this section, we define six rigorous evaluation axes, synthesize a cross-paradigm taxonomy (Table~\ref{tab:paradigm_comparison}), formalize where linear attention and SSMs interpolate between holographic superposition and dense attention, and characterize the capacity--expressivity--compute trade-offs that govern when each paradigm excels.
+
+\subsection{Evaluation Axes and Analytical Framework}\label{sec:comparison:axes}
+
+To compare representational paradigms on an equal footing, let $N$ denote the number of stored key--value associations (or active context tokens in an autoregressive sequence) and $D$ denote the ambient representation dimension (e.g., hypervector width, complex phasor dimension, or model hidden width).
+We benchmark each architectural family along six orthogonal dimensions:
+
+\paragraph{1.\ Memory Footprint and State Complexity.}
+We distinguish persistent memory state required to store $N$ items from transient working activations.
+Fixed-state parametric memories compress an arbitrary stream of $N$ associations into a constant-size vector trace $\vect{m} \in \C^D$ ($\bigo{D}$ space, i.e., $\bigo{1}$ growth in $N$) or a fixed correlation matrix $\mat{X} \in \C^{D \times D}$ ($\bigo{D^2}$ space, likewise $\bigo{1}$ in $N$).
+Conversely, non-parametric associative architectures retain every historical key--value pair explicitly in a growing cache of size $\bigo{ND}$, and dense full-sequence self-attention additionally materializes $\bigo{N^2}$ pairwise interaction scores unless tiled via hardware-aware fused kernels.
+
+\paragraph{2.\ Retrieval and Inference Complexity.}
+Given a query cue $\vect{k}$, we measure the per-query arithmetic complexity and memory-bandwidth demand required to retrieve the associated value $\hat{\vect{v}}$.
+Holographic vector unbinding executes in $\bigo{D}$ elementwise operations in the frequency domain (via conjugate Hadamard modulation $\hadamard$) or bipolar space (via bitwise XOR), and in $\bigo{D \log D}$ via the Fast Fourier Transform (FFT) for time-domain circular correlation $\ccorr$.
+Matrix correlation memories require $\bigo{D^2}$ multiply--accumulate operations per query, whereas autoregressive attention over an explicit cache incurs $\bigo{ND}$ compute and $\bigo{ND}$ memory bandwidth per generated token---creating the well-known memory-bound decoding bottleneck at large $N$.
+
+\paragraph{3.\ Training, Update, and Plasticity Paradigm.}
+Paradigms diverge sharply in how associations are acquired and revised.
+Algebraic VSA/HDC encoders and classical Hebbian/correlation HNNs support \emph{one-shot} online insertion ($\vect{m}_{t} = \vect{m}_{t-1} + \vect{k}_t \cconv \vect{v}_t$) and approximate deletion ($\vect{m}_{t} - \vect{k}_j \cconv \vect{v}_j$) without gradient descent, making them naturally suited to continual or resource-constrained adaptation.
+In contrast, Transformer attention and modern deep architectures rely on iterative end-to-end backpropagation to learn rich projection geometry, while hybrid architectures combine gradient-trained neural encoders with algebraic holographic memory modules.
+
+\paragraph{4.\ Symbolic Compositionality and Variable Binding.}
+We assess whether a paradigm natively supports dimension-preserving \emph{role--filler binding} and recursive structural composition.
+In tensor-product representations~\cite{SMOLENSKY_1990_TPR}, binding $k$ symbols produces a rank-$k$ tensor of size $D^k$, causing exponential dimensionality explosion.
+VSAs and HNNs resolve this via compressed binding ($\cconv$ or $\hadamard$), mapping $\C^D \times \C^D \to \C^D$ so that arbitrarily nested trees, graphs, and key--value records inhabit the same ambient space $\C^D$ and remain algebraically queryable.
+By contrast, classical Hopfield networks act primarily as flat pattern-completion attractors, and standard Transformers achieve compositional reasoning implicitly through multi-layer attention routing rather than explicit algebraic variable binding.
+
+\paragraph{5.\ Noise Tolerance, Capacity Scaling, and Degradation Profile.}
+Beyond peak storage capacity $N_{\max}(D)$, the \emph{geometry of failure} matters critically in real systems.
+Holographic superposition degrades smoothly and predictably as load $N/D$ increases: additive crosstalk noise $\vect{\eta}$ scales continuously such that $\SNR \propto D/N$, and distributed encoding confers intrinsic resilience to coordinate erasures, quantization, and hardware bit-flips~\cite{FRADY_CAPACITY_VSA,KLEYKO_VSA_SURVEY}.
+Classical binary Hopfield networks exhibit attractor-basin error correction up to a sharp spin-glass phase transition at critical load $\alpha_c = N_{\max}/D \approx 0.138$, beyond which retrieval collapses catastrophically~\cite{HOPFIELD_1982_ASSOCIATIVE,AMIT_1985_HOPFIELD_CAPACITY}.
+Modern continuous Hopfield networks and softmax attention suppress crosstalk exponentially, achieving exponential pattern capacity in $D$ under bounded separation margins~\cite{RAMSAUER_MODERN_HOPFIELD}, yet remain sensitive to out-of-distribution attention dilution and aggressive low-bitweight quantization.
+
+\paragraph{6.\ Hardware Affinity and Physical Execution Model.}
+Finally, we evaluate alignment with computational substrates.
+Dense Transformers are co-optimized for GPU/TPU systolic arrays executing high-arithmetic-intensity general matrix multiplications (GEMMs).
+Binary/bipolar HDC maps directly onto bitwise SIMD pipelines, low-power FPGAs, microcontrollers, and analog resistive crossbars~\cite{RAHIMI_HDC_EDGE,KARUNARATNE_2020_PCM_HDC}.
+Complex-phasor HNNs and Fourier-domain HRRs exhibit a unique physical isomorphism with coherent photonic interferometers and diffractive optical processors, where wave interference and lens-based Fourier transforms execute passively at optical bandwidth~\cite{SHEN_PHOTONIC_MZI,LIN_DIFFRACTIVE_OPTICAL_NN}.
+
+\subsection{Systematic Cross-Paradigm Comparison}\label{sec:comparison:table}
+
+Table~\ref{tab:paradigm_comparison} summarizes the four foundational paradigms---Classical HNNs~\cite{SUTHERLAND_1990_HNN}, HRR/HDC (VSAs)~\cite{PLATE_1995_HRR,KANERVA_2009_HDC,SCHLEGEL_VSA_COMPARISON}, Classical and Modern Hopfield Networks~\cite{HOPFIELD_1982_ASSOCIATIVE,RAMSAUER_MODERN_HOPFIELD}, and Transformer Self-Attention~\cite{VASWANI_TRANSFORMER}---across the evaluation axes defined above.
+Below, we dissect the structural relationships connecting these families and clarify how modern Linear Attention~\cite{KATHAROPOULOS_2020_LINEAR_TRANSFORMER} and State-Space Models~\cite{GU_SSM_S4_MAMBA} bridge the divide between parametric superposition and non-parametric attention.
+
+\begin{table}[htbp]
+\centering
+\caption{Systematic Comparative Taxonomy of Holographic, Vector-Symbolic, Associative, and Attention Paradigms. Here $N$ denotes the number of stored associations or context tokens, $D$ denotes the ambient state or hidden dimension, and $M$ denotes the cleanup codebook cardinality.}
+\label{tab:paradigm_comparison}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.24}
+\begin{tabularx}{\textwidth}{@{} >{\raggedright\arraybackslash}p{2.35cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X @{}}
+\toprule
+\textbf{Criterion} & \textbf{Classical HNN}~\cite{SUTHERLAND_1990_HNN} & \textbf{HRR / HDC (VSA)}~\cite{PLATE_1995_HRR,KANERVA_2009_HDC} & \textbf{Hopfield (Classic / Modern)}~\cite{HOPFIELD_1982_ASSOCIATIVE,RAMSAUER_MODERN_HOPFIELD} & \textbf{Transformer Attention}~\cite{VASWANI_TRANSFORMER} \\
+\midrule
+State Space \& Encoding & Complex phasors $\C^D$ (unit-magnitude or weighted phase) & $\R^D$, $\C^D$ (FHRR), or $\{-1,+1\}^D$ / $\{0,1\}^D$ & $\{-1,+1\}^D$ (classic) / continuous $\R^D$ (modern) & Continuous real latent vectors $\R^D$ \\
+\addlinespace[2pt]
+Memory Footprint & $\bigo{D^2}$ correlation matrix (or $\bigo{D}$ per output); $\bigo{1}$ in $N$ & $\bigo{D}$ single trace vector; $\bigo{1}$ in $N$ & $\bigo{D^2}$ (classic) / $\bigo{ND}$ explicit pattern matrix (modern) & $\bigo{ND}$ KV-cache; $\bigo{N^2}$ dense score matrix \\
+\addlinespace[2pt]
+Per-Query Retrieval Compute & $\bigo{D^2}$ complex matrix--vector correlation & $\bigo{D}$ ($\hadamard$/XOR) or $\bigo{D\log D}$ (FFT $\ccorr$) & $\bigo{D^2}$ per step (classic) / $\bigo{ND}$ softmax step (modern) & $\bigo{ND}$ autoregressive; $\bigo{N^2 D}$ full sequence \\
+\addlinespace[2pt]
+Binding / Retrieval Mechanism & Complex Hermitian correlation $\mat{X}\vect{k}$ and phase folding & Binding $\cconv$ / $\hadamard$ / XOR; unbinding $\ccorr$ / $\conj{\vect{k}}\hadamard\vect{m}$ & Energy descent (classic) / $\mat{K}\trans\operatorname{softmax}(\beta\mat{K}\vect{q})$ & Scaled dot-product $\mat{V}\trans\operatorname{softmax}(\mat{K}\vect{q}/\sqrt{d_k})$ \\
+\addlinespace[2pt]
+Storage Capacity ($N_{\max}$) & $\bigo{D}$ per output channel (crosstalk-limited) & $\bigo{D / \log M}$ with cleanup codebook~\cite{FRADY_CAPACITY_VSA} & $\approx 0.138D$ (classic)~\cite{AMIT_1985_HOPFIELD_CAPACITY} / $\bigo{c^{D/2}}$ (modern) & Unbounded in $D$ up to cache size $N$; sharp softmax separation \\
+\addlinespace[2pt]
+Training \& Update Paradigm & One-shot correlation / iterative phase-error folding & Training-free algebraic / single-pass / hybrid SGD & Hebbian outer product / differentiable energy network & End-to-end iterative backpropagation (SGD/Adam) \\
+\addlinespace[2pt]
+Symbolic Compositionality & Moderate (higher-order phase products) & High (native dimension-preserving role--filler nesting) & Low (flat auto-associative pattern completion) & Implicit / emergent via deep multi-head routing \\
+\addlinespace[2pt]
+Noise \& Fault Tolerance & High (graceful $\SNR \propto D/N$ decay) & Very high (blessing of dimensionality; BER-resilient) & High within attractor basins; sharp collapse past $\alpha_c$ (classic) & Moderate (sensitive to quantization and attention dilution) \\
+\addlinespace[2pt]
+Primary Hardware Affinity & Coherent photonics / phase-domain optics & Edge MCU / FPGA / ASIC / analog IMC crossbars & Analog crossbars (classic) / GPU tensor cores (modern) & GPU / TPU dense GEMM accelerators \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Classical HNNs versus HRR/HDC: Matrix Correlation vs.\ Vector Folding.}
+Both Sutherland's HNN~\cite{SUTHERLAND_1990_HNN} and Plate's HRR~\cite{PLATE_1995_HRR} encode stimulus--response pairs $\{(\vect{k}_n, \vect{v}_n)\}_{n=1}^N$ via distributed phase interference, yet they differ crucially in spatial compression.
+A classical HNN maintains a complex Hermitian correlation matrix
+\begin{equation}\label{eq:hnn_corr_matrix}
+    \mat{X} = \sum_{n=1}^{N} \vect{v}_n \vect{k}_n\herm \in \C^{D \times D},
+\end{equation}
+so that querying with $\vect{k}_q$ yields $\hat{\vect{v}}_q = \frac{1}{D}\mat{X}\vect{k}_q = \vect{v}_q + \frac{1}{D}\sum_{n \neq q} (\vect{k}_n\herm\vect{k}_q)\vect{v}_n$ (for unit-modulus phasor keys satisfying $\vect{k}_n\herm\vect{k}_n = D$).
+In contrast, HRR and Fourier HRR (FHRR) fold the rank-$N$ outer-product superposition into a single $\bigo{D}$ trace vector: consistent with Section~\ref{sec:history:vsa}, summing the unconjugated outer products $\sum_{n=1}^{N} \vect{k}_n \otimes \vect{v}_n$ along wrapped anti-diagonals $(a + b) \bmod D = j$ yields the circular-convolution trace $\vect{m} = \sum_{n=1}^N \vect{k}_n \cconv \vect{v}_n$ (or $\DFT\{\vect{m}\} = \sum_{n=1}^N \DFT\{\vect{k}_n\} \hadamard \DFT\{\vect{v}_n\}$ in the frequency domain), whereas summing the Hermitian correlation matrix $\mat{X}$ in~\eqref{eq:hnn_corr_matrix} along wrapped main diagonals $(a - b) \bmod D = j$ yields the circular-correlation trace $\sum_{n=1}^N \vect{k}_n \ccorr \vect{v}_n$.
+Because each coordinate of $\vect{m}$ aggregates $D$ pairwise outer-product entries, HRR/HDC slashes memory complexity from $\bigo{D^2}$ to $\bigo{D}$ and retrieval compute from $\bigo{D^2}$ to $\bigo{D \log D}$ (or $\bigo{D}$ in phase space), while preserving identical $\bigo{D}$ asymptotic capacity scaling per trace---at the cost of a modest constant-factor increase in crosstalk variance that is readily suppressed by a downstream cleanup memory~\cite{PLATE_1995_HRR,SCHLEGEL_VSA_COMPARISON}.
+
+\paragraph{From Classical Hopfield Networks to Modern Hopfield and Transformer Attention.}
+The classical Hopfield network~\cite{HOPFIELD_1982_ASSOCIATIVE} constructs a symmetric real auto-associative matrix $\mat{W} = \frac{1}{D}\sum_{n=1}^N \vect{x}_n \vect{x}_n\trans \in \R^{D \times D}$, which is structurally a real, bipolar, unkeyed special case of~\eqref{eq:hnn_corr_matrix}.
+Because its quadratic energy $E(\vect{q}) = -\frac{1}{2}\vect{q}\trans\mat{W}\vect{q}$ relies on linear inner-product superposition, cross-terms $\sum_{n \neq q} (\vect{x}_n\trans \vect{q})\vect{x}_n$ accumulate linearly with $N$, imposing the strict spin-glass capacity ceiling $N_{\max} \approx 0.138 D$~\cite{AMIT_1985_HOPFIELD_CAPACITY}.
+Modern continuous Hopfield networks~\cite{RAMSAUER_MODERN_HOPFIELD} shatter this linear barrier by replacing the quadratic interaction with a log-sum-exp energy over an \emph{explicitly stored} matrix of patterns $\mat{K} = [\vect{k}_1, \dots, \vect{k}_N]\trans \in \R^{N \times D}$:
+\begin{equation}\label{eq:modern_hopfield_energy}
+    E(\vect{q}) = -\beta^{-1}\log\!\left(\sum_{n=1}^{N} \exp\!\left(\beta\,\vect{k}_n\trans\vect{q}\right)\right) + \frac{1}{2}\norm{\vect{q}}_2^2 + \text{const.},
+\end{equation}
+where $\beta > 0$ is an inverse temperature.
+Minimizing~\eqref{eq:modern_hopfield_energy} via the concave--convex procedure yields the single-step retrieval rule
+\begin{equation}\label{eq:modern_hopfield_update}
+    \vect{q}^{\text{new}} = \mat{K}\trans \operatorname{softmax}\!\left(\beta \mat{K}\vect{q}\right).
+\end{equation}
+Decoupling the stored keys $\mat{K} \in \R^{N \times d_k}$ from associated values $\mat{V} \in \R^{N \times d_v}$ and setting $\beta = 1/\sqrt{d_k}$ recovers the exact scaled dot-product attention head of the Transformer~\cite{VASWANI_TRANSFORMER}:
+\begin{equation}\label{eq:transformer_attn}
+    \operatorname{Attn}(\vect{q}, \mat{K}, \mat{V}) = \mat{V}\trans \operatorname{softmax}\!\left(\frac{\mat{K}\vect{q}}{\sqrt{d_k}}\right).
+\end{equation}
+This equivalence illuminates the core trade-off in Table~\ref{tab:paradigm_comparison}: the exponential kernel inside $\operatorname{softmax}(\cdot)$ exponentially dampens non-matching inner products, eliminating additive holographic crosstalk $\vect{\eta}$ and elevating theoretical capacity from $\bigo{D}$ to exponential in $D$.
+However, that exponential nonlinearity cannot be factored across the summation over $n$, forcing the model to abandon fixed-size superposition and retain all $N$ keys and values explicitly at $\bigo{ND}$ memory cost.
+
+\paragraph{Where Linear Attention and State-Space Models Interpolate.}
+Applying the epistemic taxonomy of Section~\ref{sec:intro:methodology}, contemporary sub-quadratic sequence models connect to~\eqref{eq:hnn_corr_matrix} and~\eqref{eq:transformer_attn} across distinct levels of mathematical rigor.
+In kernelized Linear Attention~\cite{KATHAROPOULOS_2020_LINEAR_TRANSFORMER}, the unfactorable exponential similarity $\exp(\vect{k}_n\trans\vect{q}/\sqrt{d_k})$ is approximated by an explicit feature-map inner product $\phi(\vect{k}_n)\trans\phi(\vect{q})$ with $\phi: \R^{d_k} \to \R^{D_\phi}$.
+Applying associativity of matrix multiplication collapses the $\bigo{ND}$ cache back into a fixed-size recurrent correlation state:
+\begin{equation}\label{eq:comp_linear_attn_state}
+    \mat{S}_t = \mat{S}_{t-1} + \vect{v}_t \phi(\vect{k}_t)\trans = \sum_{\tau=1}^{t} \vect{v}_\tau \phi(\vect{k}_\tau)\trans \in \R^{d_v \times D_\phi},
+    \qquad
+    \hat{\vect{v}}_t = \frac{\mat{S}_t \phi(\vect{q}_t)}{\vect{z}_t\trans \phi(\vect{q}_t)},
+\end{equation}
+where $\vect{z}_t = \sum_{\tau=1}^t \phi(\vect{k}_\tau)$.
+Comparing~\eqref{eq:comp_linear_attn_state} directly with~\eqref{eq:hnn_corr_matrix} yields an \emph{exact algebraic equivalence} (up to real-field restriction and scalar denominator normalization): causal linear attention is a real-valued, gradient-trained holographic correlation memory equipped with learned key encodings $\phi(\cdot)$.
+By contrast, diagonal complex Structured State-Space Models (such as S4D and related linear recurrent units) exhibit a \emph{structural analogy}, evolving a complex hidden state via
+\begin{equation}\label{eq:comp_ssm_recurrence}
+    \vect{h}_t = \mat{\Lambda}\vect{h}_{t-1} + \mat{B}\vect{u}_t,
+    \qquad
+    \mat{\Lambda} = \operatorname{diag}\!\left(\lambda_1 e^{i\omega_1}, \dots, \lambda_D e^{i\omega_D}\right) \in \C^{D \times D},
+\end{equation}
+which unrolls into a phase-modulated, exponentially discounted superposition $\vect{h}_t = \sum_{\tau=1}^t \mat{\Lambda}^{t-\tau}\mat{B}\vect{u}_\tau$.
+Each complex channel $\lambda_d e^{i\omega_d}$ binds historical token embeddings to relative-position phase rotations $e^{i\omega_d(t-\tau)}$---a continuous-frequency structural analog of VSA permutation-based sequence encoding---while magnitude decay $\lambda_d \in (0, 1)$ implements soft forgetting to prevent unbounded interference accumulation.
+Selective SSMs (e.g., Mamba~\cite{GU_SSM_S4_MAMBA}) and gated linear-attention variants go one step further by introducing input-dependent decay gates $\mat{\Lambda}(\vect{u}_t)$, allowing the model to dynamically suppress irrelevant tokens and allocate its finite $\bigo{D}$ holographic capacity preferentially to salient context.
+Recent matrix-state refinements---notably DeltaNet~\cite{YANG_2024_DELTANET} and Gated DeltaNet~\cite{YANG_2025_GATED_DELTANET}---likewise stand in \emph{structural analogy} with Sutherland's error-correcting update~\eqref{eq:sutherland_delta}, augmenting~\eqref{eq:comp_linear_attn_state} with online delta-rule key erasure and selective decay gates to curb interference within the $\bigo{D^2}$ parametric regime.
+Along the vector-folded axis, Alam et al.~\cite{HOLOGRAPHIC_ATTENTION_OR_KV_CACHE} replace quadratic dot-product attention with compressive HRR superposition in $\bigo{D}$ state per trace, while Generalized HRRs (GHRRs)~\cite{YEUNG_2024_GHRR} lift scalar phasors to $m \times m$ unitary blocks in $U(m)^D$ to obtain non-commutative binding and tunable kernel expressivity.
+Finally, hybrid architectures such as Griffin~\cite{DE_2024_GRIFFIN} and Titans~\cite{BEHROUZ_2025_TITANS} exhibit a functional \emph{architectural correspondence} with the hybrid holographic designs discussed in Section~\ref{sec:potentials:kvcache}, straddling the parametric/non-parametric boundary of Table~\ref{tab:paradigm_comparison} by pairing bounded local softmax attention ($\bigo{WD}$) with gated linear recurrences or test-time gradient-updated neural long-term memory.
+
+\subsection{Capacity--Expressivity--Compute Trade-offs}\label{sec:comparison:tradeoffs}
+
+The comparative structure above reflects an underlying information-theoretic duality between \emph{non-parametric exact retrieval} and \emph{parametric holographic superposition}.
+We make this trade-off explicit in the following analytical comparison.
+
+\begin{proposition}[Parametric Superposition vs.\ Non-Parametric Retention Trade-off]\label{prop:superposition_duality}
+Consider storing $N$ independent key--value associations $\{(\vect{k}_n, \vect{v}_n)\}_{n=1}^N$ drawn from isotropic distributions over $\C^D$ (or $\R^D$), where each value belongs to a discrete codebook $\mathcal{V}$ of cardinality $M = \abs{\mathcal{V}}$:
+\begin{enumerate}
+    \item \emph{Vector Holographic Superposition (HRR/FHRR):} Compressing all $N$ pairs into a single trace $\vect{m} \in \C^D$ achieves $\bigo{D}$ memory and $\bigo{D}$--$\bigo{D \log D}$ retrieval compute, but incurs additive crosstalk noise $\vect{\eta}$ yielding per-query $\SNR = \Theta(D / N)$. Reliable nearest-neighbor cleanup over $\mathcal{V}$ therefore requires $D = \Omega(N \log M)$~\cite{FRADY_CAPACITY_VSA}, corresponding to a linear capacity ceiling $N_{\max} = \bigo{D / \log M}$.
+    \item \emph{Matrix Associative / Linear Attention States:} Storing $\mat{S} \in \C^{d_v \times d_k}$ expands memory to $\bigo{d_k d_v}$ ($\bigo{1}$ in $N$) and enables exact zero-crosstalk retrieval whenever $N \le d_k$ and keys are mutually orthogonal; once $N > d_k$, linear dependence among keys induces unavoidable projection interference scaling with $N / d_k$.
+    \item \emph{Non-Parametric Softmax Attention / Modern Hopfield:} Retaining all $N$ pairs explicitly incurs $\bigo{ND}$ memory and $\bigo{ND}$ per-query compute, but suppresses cross-pattern interference exponentially in the inverse temperature $\beta$ and minimum key separation margin, supporting lossless retrieval even when $N \gg D$~\cite{RAMSAUER_MODERN_HOPFIELD}.
+\end{enumerate}
+\end{proposition}
+
+\paragraph{Information-Theoretic Ceiling on Verbatim Recall.}
+Proposition~\ref{prop:superposition_duality} exposes a fundamental physical limit that applies equally to HNNs, VSAs, linear attention, and SSMs.
+Any fixed-dimensional latent state $\vect{h} \in \C^D$ represented at $b$ bits per real coordinate can encode at most $2bD$ bits of Shannon information.
+Consequently, no fixed-state architecture can perform arbitrary, lossless verbatim copying of an unstructured random sequence of length $N$ whose entropy exceeds $2bD$ bits.
+Recent theoretical and empirical analyses comparing Transformers against recurrent SSMs confirm this exact separation: Transformers solve arbitrary string copying and verbatim ``needle-in-a-haystack'' retrieval across long horizons by scaling their non-parametric KV-cache linearly with $N$, whereas fixed-state architectures suffer sharp accuracy collapse once the active retrieval burden surpasses their state capacity~\cite{JELASSI_2024_REPEAT_AFTER_ME}.
+
+\paragraph{When Holographic Superposition Wins versus Loses.}
+Recognizing this ceiling does not diminish the practical utility of holographic computing; rather, it sharply delineates the operational regimes in which each paradigm dominates:
+
+\begin{itemize}
+    \item \emph{Regimes favoring holographic superposition (HNN/VSA/SSM):}
+    (i)~\textbf{Unbounded streaming telemetry and edge monitoring}, where $N \to \infty$ under strict memory and energy budgets, making $\bigo{ND}$ caches physically infeasible while recent or statistically aggregated patterns suffice;
+    (ii)~\textbf{Structured symbolic queries over bounded codebooks}, where a cleanup memory or resonator network projects noisy superpositions back onto valid discrete symbols, converting modest $\SNR$ into near-zero symbolic error;
+    (iii)~\textbf{Fault-prone, low-precision, and physical wave-computing hardware}, where distributed holographic coding absorbs analog noise, thermal phase drift, and device bit-flips without catastrophic failure; and
+    (iv)~\textbf{Online one-shot and continual association}, where new key--value facts must be bound or unbound in $\bigo{D}$ time without re-indexing or gradient updates.
+    \item \emph{Regimes favoring explicit non-parametric attention:}
+    (i)~\textbf{Verbatim long-range lookup and exact copying} (e.g., retrieving an arbitrary identifier, code snippet, or unindexed numerical token from $10^5$ tokens earlier), where $N \gg D$ and no fixed codebook bounds the target entropy; and
+    (ii)~\textbf{Fine-grained, multi-hop contextual disambiguation} over subtle, non-orthogonal natural-language nuances where additive linear crosstalk degrades precision unless isolated by sharp softmax selectivity.
+\end{itemize}
+
+This dichotomy points directly toward the central engineering thesis of this survey.
+On dedicated edge and photonic hardware (Section~\ref{sec:applications}), pure holographic and vector-symbolic architectures already unlock orders-of-magnitude gains in energy efficiency, latency, and fault resilience.
+For frontier foundation models, however, neither pure $\bigo{N^2}$ dense attention nor pure $\bigo{1}$ fixed-state superposition is universally optimal: the most compelling path forward lies in \emph{hybrid architectures} that pair high-precision local or sparse non-parametric attention with fixed-footprint holographic memory traces for long-horizon semantic context, as developed in Section~\ref{sec:potentials}.

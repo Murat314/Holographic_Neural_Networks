@@ -1,0 +1,314 @@
+\begin{thebibliography}{10}
+
+\bibitem{HOLOGRAPHIC_ATTENTION_OR_KV_CACHE}
+Mohammad~Mahmudul Alam, Edward Raff, Stella Biderman, Tim Oates, and James
+  Holt.
+\newblock Recasting self-attention with holographic reduced representations.
+\newblock In {\em Proceedings of the 40th International Conference on Machine
+  Learning (ICML)}, volume 202 of {\em Proceedings of Machine Learning
+  Research}, pages 490--507. PMLR, 2023.
+
+\bibitem{AMIT_1985_HOPFIELD_CAPACITY}
+Daniel~J. Amit, Hanoch Gutfreund, and Haim Sompolinsky.
+\newblock Storing infinite numbers of patterns in a spin-glass model of neural
+  networks.
+\newblock {\em Physical Review Letters}, 55(14):1530--1533, 1985.
+
+\bibitem{ARJOVSKY_2016_URNN}
+Martin Arjovsky, Amar Shah, and Yoshua Bengio.
+\newblock Unitary evolution recurrent neural networks.
+\newblock In {\em Proceedings of the 33rd International Conference on Machine
+  Learning (ICML)}, volume~48 of {\em Proceedings of Machine Learning
+  Research}, pages 1120--1128. PMLR, 2016.
+
+\bibitem{ARORA_2023_ZOOLOGY}
+Simran Arora, Sabri Eyuboglu, Aman Timalsina, Isys Johnson, Michael Poli, James
+  Zou, Atri Rudra, and Christopher R{\'e}.
+\newblock Zoology: Measuring and improving recall in efficient language models.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2024.
+
+\bibitem{BASSEY_CVNN_SURVEY}
+Joshua Bassey, Lijun Qian, and Xianfang Li.
+\newblock A survey of complex-valued neural networks.
+\newblock {\em arXiv preprint arXiv:2101.12249}, 2021.
+
+\bibitem{BEHROUZ_2025_TITANS}
+Ali Behrouz, Peilin Zhong, and Vahab Mirrokni.
+\newblock Titans: Learning to memorize at test time.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  pages 125925--125962, 2025.
+
+\bibitem{HOLOGRAPHIC_CONTINUAL_LEARNING}
+Brian Cheung, Alexander Terekhov, Yubei Chen, Pulkit Agrawal, and Bruno~A.
+  Olshausen.
+\newblock Superposition of many models into one.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~32, pages 10867--10876, 2019.
+
+\bibitem{CLEMENTS_2016_MZI}
+William~R. Clements, Peter~C. Humphreys, Benjamin~J. Metcalf, W.~Steven
+  Kolthammer, and Ian~A. Walmsley.
+\newblock Optimal design for universal multiport interferometers.
+\newblock {\em Optica}, 3(12):1460, 2016.
+
+\bibitem{DE_2024_GRIFFIN}
+Soham De, Samuel~L. Smith, Anushan Fernando, Aleksandar Botev, George
+  Cristian-Muraru, Albert Gu, Ruba Haroun, Leonard Berrada, Yutian Chen,
+  Srivatsan Srinivasan, Guillaume Desjardins, Arnaud Doucet, David Budden,
+  Yee~Whye Teh, Razvan Pascanu, Nando De~Freitas, and Caglar Gulcehre.
+\newblock Griffin: Mixing gated linear recurrences with local attention for
+  efficient language models.
+\newblock {\em arXiv preprint arXiv:2402.19427}, 2024.
+
+\bibitem{ELHAGE_2022_SUPERPOSITION}
+Nelson Elhage, Tristan Hume, Catherine Olsson, Nicholas Schiefer, Tom Henighan,
+  Shauna Kravec, Zac Hatfield-Dodds, Robert Lasenby, Dawn Drain, Carol Chen,
+  Roger Grosse, Sam McCandlish, Jared Kaplan, Dario Amodei, Martin Wattenberg,
+  and Christopher Olah.
+\newblock Toy models of superposition.
+\newblock {\em Transformer Circuits Thread}, 2022.
+
+\bibitem{FRADY_2020_RESONATOR}
+E.~Paxon Frady, Spencer~J. Kent, Bruno~A. Olshausen, and Friedrich~T. Sommer.
+\newblock Resonator networks, 1: An efficient solution for factoring
+  high-dimensional, distributed representations of data structures.
+\newblock {\em Neural Computation}, 32(12):2311--2331, 2020.
+
+\bibitem{FRADY_CAPACITY_VSA}
+E.~Paxon Frady, Denis Kleyko, and Friedrich~T. Sommer.
+\newblock A theory of sequence indexing and working memory in recurrent neural
+  networks.
+\newblock {\em Neural Computation}, 30(6):1449--1513, 2018.
+
+\bibitem{GABOR_1948_HOLOGRAPHY}
+Dennis Gabor.
+\newblock A new microscopic principle.
+\newblock {\em Nature}, 161(4098):777--778, 1948.
+
+\bibitem{GE_2020_HDC_CLASSIFICATION}
+Lulu Ge and Keshab~K. Parhi.
+\newblock Classification using hyperdimensional computing: A review.
+\newblock {\em IEEE Circuits and Systems Magazine}, 20(2):30--47, 2020.
+
+\bibitem{GU_SSM_S4_MAMBA}
+Albert Gu, Karan Goel, and Christopher R{\'e}.
+\newblock Efficiently modeling long sequences with structured state spaces.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2022.
+
+\bibitem{HERSCHE_2023_NVSA}
+Michael Hersche, Mustafa Zeqiri, Luca Benini, Abu Sebastian, and Abbas Rahimi.
+\newblock A neuro-vector-symbolic architecture for solving {Raven}'s
+  progressive matrices.
+\newblock {\em Nature Machine Intelligence}, 5(4):363--375, 2023.
+
+\bibitem{HOOKER_2021_HARDWARE_LOTTERY}
+Sara Hooker.
+\newblock The hardware lottery.
+\newblock {\em Communications of the ACM}, 64(12):58--65, 2021.
+
+\bibitem{HOPFIELD_1982_ASSOCIATIVE}
+John~J. Hopfield.
+\newblock Neural networks and physical systems with emergent collective
+  computational abilities.
+\newblock {\em Proceedings of the National Academy of Sciences},
+  79(8):2554--2558, 1982.
+
+\bibitem{HSIEH_2024_RULER}
+Cheng-Ping Hsieh, Simeng Sun, Samuel Kriman, Shantanu Acharya, Dima Rekesh, Fei
+  Jia, Yang Zhang, and Boris Ginsburg.
+\newblock {RULER}: What's the real context size of your long-context language
+  models?
+\newblock In {\em First Conference on Language Modeling (COLM)}, 2024.
+
+\bibitem{JELASSI_2024_REPEAT_AFTER_ME}
+Samy Jelassi, David Brandfonbrener, Sham~M. Kakade, and Eran Malach.
+\newblock Repeat after me: Transformers are better than state space models at
+  copying.
+\newblock In {\em Proceedings of the 41st International Conference on Machine
+  Learning (ICML)}, volume 235 of {\em Proceedings of Machine Learning
+  Research}, pages 21502--21521. PMLR, 2024.
+
+\bibitem{KANERVA_2009_HDC}
+Pentti Kanerva.
+\newblock Hyperdimensional computing: An introduction to computing in
+  distributed representation with high-dimensional random vectors.
+\newblock {\em Cognitive Computation}, 1(2):139--159, 2009.
+
+\bibitem{KARUNARATNE_2020_PCM_HDC}
+Geethan Karunaratne, Manuel Le~Gallo, Giovanni Cherubini, Luca Benini, Abbas
+  Rahimi, and Abu Sebastian.
+\newblock In-memory hyperdimensional computing.
+\newblock {\em Nature Electronics}, 3(6):327--337, 2020.
+
+\bibitem{KATHAROPOULOS_2020_LINEAR_TRANSFORMER}
+Angelos Katharopoulos, Apoorv Vyas, Nikolaos Pappas, and Fran{\c{c}}ois
+  Fleuret.
+\newblock Transformers are {RNN}s: Fast autoregressive transformers with linear
+  attention.
+\newblock In {\em Proceedings of the 37th International Conference on Machine
+  Learning (ICML)}, volume 119 of {\em Proceedings of Machine Learning
+  Research}, pages 5156--5165. PMLR, 2020.
+
+\bibitem{KENT_2020_RESONATOR}
+Spencer~J. Kent, E.~Paxon Frady, Friedrich~T. Sommer, and Bruno~A. Olshausen.
+\newblock Resonator networks, 2: Factorization performance and capacity
+  compared to optimization-based methods.
+\newblock {\em Neural Computation}, 32(12):2332--2388, 2020.
+
+\bibitem{KIM_2020_GENIEHD}
+Yeseong Kim, Mohsen Imani, Niema Moshiri, and Tajana Rosing.
+\newblock {GenieHD}: Efficient {DNA} pattern matching accelerator using
+  hyperdimensional computing.
+\newblock In {\em 2020 Design, Automation \& Test in Europe Conference \&
+  Exhibition (DATE)}, pages 115--120. IEEE, 2020.
+
+\bibitem{KIRKPATRICK_2017_EWC}
+James Kirkpatrick, Razvan Pascanu, Neil Rabinowitz, Joel Veness, Guillaume
+  Desjardins, Andrei~A. Rusu, Kieran Milan, John Quan, Tiago Ramalho, Agnieszka
+  Grabska-Barwinska, Demis Hassabis, Claudia Clopath, Dharshan Kumaran, and
+  Raia Hadsell.
+\newblock Overcoming catastrophic forgetting in neural networks.
+\newblock {\em Proceedings of the National Academy of Sciences},
+  114(13):3521--3526, 2017.
+
+\bibitem{KLEYKO_VSA_SURVEY}
+Denis Kleyko, Dmitri~A. Rachkovskij, Evgeny Osipov, and Abbas Rahimi.
+\newblock A survey on hyperdimensional computing aka vector symbolic
+  architectures, part {I}: Models and data transformations.
+\newblock {\em ACM Computing Surveys}, 55(6):1--40, 2023.
+
+\bibitem{KURATOV_2024_BABILONG}
+Yuri Kuratov, Aydar Bulatov, Petr Anokhin, Ivan Rodkin, Dmitry Sorokin, Artyom
+  Sorokin, and Mikhail Burtsev.
+\newblock {BABILong}: Testing the limits of {LLMs} with long context
+  reasoning-in-a-haystack.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~37, pages 106519--106554, 2024.
+
+\bibitem{LEE_THORP_FNET}
+James Lee-Thorp, Joshua Ainslie, Ilya Eckstein, and Santiago Onta{\~n}{\'o}n.
+\newblock {FNet}: Mixing tokens with {Fourier} transforms.
+\newblock In {\em Proceedings of the 2022 Conference of the North American
+  Chapter of the Association for Computational Linguistics: Human Language
+  Technologies (NAACL-HLT)}, pages 4296--4313. Association for Computational
+  Linguistics, 2022.
+
+\bibitem{LIN_DIFFRACTIVE_OPTICAL_NN}
+Xing Lin, Yair Rivenson, Nezih~T. Yardimci, Muhammed Veli, Yi~Luo, Mona
+  Jarrahi, and Aydogan Ozcan.
+\newblock All-optical machine learning using diffractive deep neural networks.
+\newblock {\em Science}, 361(6406):1004--1008, 2018.
+
+\bibitem{LONGUET_HIGGINS_1968_HOLOPHONE}
+H.~Christopher Longuet-Higgins.
+\newblock Holographic model of temporal recall.
+\newblock {\em Nature}, 217(5123):104, 1968.
+
+\bibitem{MCMAHON_2023_PHYSICS_OPTICAL_NN}
+Peter~L. McMahon.
+\newblock The physics of optical computing.
+\newblock {\em Nature Reviews Physics}, 5(12):717--734, 2023.
+
+\bibitem{NEUBERT_2019_HDC_ROBOTICS}
+Peer Neubert, Stefan Schubert, and Peter Protzel.
+\newblock An introduction to hyperdimensional computing for robotics.
+\newblock {\em KI -- K{\"u}nstliche Intelligenz}, 33(4):319--330, 2019.
+
+\bibitem{NICKEL_2016_HOLE}
+Maximilian Nickel, Lorenzo Rosasco, and Tomaso Poggio.
+\newblock Holographic embeddings of knowledge graphs.
+\newblock In {\em Proceedings of the Thirtieth AAAI Conference on Artificial
+  Intelligence (AAAI)}, volume~30, pages 1955--1961, 2016.
+
+\bibitem{PLATE_1995_HRR}
+Tony~A. Plate.
+\newblock Holographic reduced representations.
+\newblock {\em IEEE Transactions on Neural Networks}, 6(3):623--641, 1995.
+
+\bibitem{RAHIMI_HDC_EDGE}
+Abbas Rahimi, Pentti Kanerva, Luca Benini, and Jan~M. Rabaey.
+\newblock Efficient biosignal processing using hyperdimensional computing:
+  Network templates for combined learning and classification of {ExG} signals.
+\newblock {\em Proceedings of the IEEE}, 107(1):123--143, 2019.
+
+\bibitem{RAMSAUER_MODERN_HOPFIELD}
+Hubert Ramsauer, Bernhard Sch{\"a}fl, Johannes Lehner, Philipp Seidl, Michael
+  Widrich, Thomas Adler, Lukas Gruber, Markus Holzleitner, Milena Pavlovi{\'c},
+  Geir~Kjetil Sandve, Victor Greiff, David Kreil, Michael Kopp, G{\"u}nter
+  Klambauer, Johannes Brandstetter, and Sepp Hochreiter.
+\newblock {Hopfield} networks is all you need.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2021.
+
+\bibitem{SCHLEGEL_VSA_COMPARISON}
+Kenny Schlegel, Peer Neubert, and Peter Protzel.
+\newblock A comparison of vector symbolic architectures.
+\newblock {\em Artificial Intelligence Review}, 55(6):4523--4555, 2022.
+
+\bibitem{SHEN_PHOTONIC_MZI}
+Yichen Shen, Nicholas~C. Harris, Scott Skirlo, Mihika Prabhu, Tom Baehr-Jones,
+  Michael Hochberg, Xin Sun, Shijie Zhao, Hugo Larochelle, Dirk Englund, and
+  Marin Solja{\v{c}}i{\'c}.
+\newblock Deep learning with coherent nanophotonic circuits.
+\newblock {\em Nature Photonics}, 11(7):441--446, 2017.
+
+\bibitem{SMOLENSKY_1990_TPR}
+Paul Smolensky.
+\newblock Tensor product variable binding and the representation of symbolic
+  structures in connectionist systems.
+\newblock {\em Artificial Intelligence}, 46(1--2):159--216, 1990.
+
+\bibitem{SU_2024_ROPE}
+Jianlin Su, Murtadha Ahmed, Yu~Lu, Shengfeng Pan, Wen Bo, and Yunfeng Liu.
+\newblock {RoFormer}: Enhanced transformer with rotary position embedding.
+\newblock {\em Neurocomputing}, 568:127063, 2024.
+
+\bibitem{SUTHERLAND_1990_HNN}
+John~G. Sutherland.
+\newblock A holographic model of memory, learning and expression.
+\newblock {\em International Journal of Neural Systems}, 1(3):259--267, 1990.
+
+\bibitem{TRABELSI_2018_DCN}
+Chiheb Trabelsi, Olexa Bilaniuk, Ying Zhang, Dmitriy Serdyuk, Sandeep
+  Subramanian, Jo{\~a}o~Felipe Santos, Soroush Mehri, Negar Rostamzadeh, Yoshua
+  Bengio, and Christopher~J. Pal.
+\newblock Deep complex networks.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2018.
+
+\bibitem{VASWANI_TRANSFORMER}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+  Aidan~N. Gomez, {\L}ukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~30, pages 5998--6008, 2017.
+
+\bibitem{WETZSTEIN_2020_OPTICAL_AI}
+Gordon Wetzstein, Aydogan Ozcan, Sylvain Gigan, Shanhui Fan, Dirk Englund,
+  Marin Solja{\v{c}}i{\'c}, Cornelia Denz, David A.~B. Miller, and Demetri
+  Psaltis.
+\newblock Inference in artificial intelligence with deep optics and photonics.
+\newblock {\em Nature}, 588(7836):39--47, 2020.
+
+\bibitem{YANG_2025_GATED_DELTANET}
+Songlin Yang, Jan Kautz, and Ali Hatamizadeh.
+\newblock Gated delta networks: Improving {Mamba2} with delta rule.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2025.
+
+\bibitem{YANG_2024_DELTANET}
+Songlin Yang, Bailin Wang, Yu~Zhang, Yikang Shen, and Yoon Kim.
+\newblock Parallelizing linear transformers with the delta rule over sequence
+  length.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~37, pages 115491--115522, 2024.
+
+\bibitem{YEUNG_2024_GHRR}
+Calvin Yeung, Zhuowen Zou, SungHeon Jeong, Wenjun Huang, Nathaniel~D. Bastian,
+  and Mohsen Imani.
+\newblock Generalized holographic reduced representations.
+\newblock {\em arXiv preprint arXiv:2405.09689}, 2024.
+
+\end{thebibliography}

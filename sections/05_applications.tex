@@ -1,0 +1,160 @@
+\section{Current Applications and Hardware Co-Design}\label{sec:applications}
+
+While the preceding sections examined holographic and vector-symbolic models primarily through mathematical and architectural lenses, the past decade has witnessed their transition from theoretical cognitive models into concrete engineering systems.
+Crucially, the most compelling deployments do not treat holographic superposition merely as a drop-in replacement for dense matrix multiplication on conventional GPUs; instead, they exploit regimes where distributed phase-space algebra confers decisive algorithmic or physical advantages.
+We organize current deployments and hardware co-design efforts into three major thrusts: (1)~neuro-symbolic AI and compositional reasoning, (2)~ultra-low-power edge computing and fault-tolerant in-memory biosignal processing, and (3)~coherent photonic and optical AI accelerators that execute complex-valued holographic primitives directly in wave physics.
+
+\subsection{Neuro-Symbolic AI and Compositional Reasoning}\label{sec:applications:neurosymbolic}
+
+Modern deep neural networks excel at perceptual feature extraction from raw sensory data but remain brittle on systematic compositional generalization, multi-step variable binding, and verifiable symbolic manipulation.
+Holographic Reduced Representations (HRRs) and Vector Symbolic Architectures (VSAs) offer a mathematically transparent bridge between sub-symbolic embeddings and discrete symbolic structures by enabling arbitrary relational graphs, parse trees, and predicate logic formulas to be compiled into---and manipulated directly within---fixed-dimensional vector spaces~\cite{PLATE_1995_HRR,KLEYKO_VSA_SURVEY}.
+
+\paragraph{Structured Knowledge Graphs and Holographic Embeddings.}
+Consider a symbolic knowledge graph $\mathcal{G} = \{(s_m, r_m, o_m)\}_{m=1}^{M}$ consisting of subject--relation--object triples over entity and relation vocabularies.
+Naively summing entity embeddings produces the classic \emph{superposition catastrophe}, wherein component bindings are lost and cross-triple pairings become indistinguishable.
+Holographic architectures avoid this collapse by binding each triple into a composite vector prior to bundling.
+Because circular convolution $\cconv$ is commutative ($\vect{a}\cconv\vect{b} = \vect{b}\cconv\vect{a}$) and equivariant to cyclic shifts $\rho$ (so $\rho(\vect{a})\cconv\vect{b} = \vect{a}\cconv\rho(\vect{b})$, leaving cyclic-shift encodings invariant to argument swaps), non-symmetric roles are preserved by binding explicit role keys $(\vect{k}_{\text{subj}}, \vect{k}_{\text{rel}}, \vect{k}_{\text{obj}})$, by applying a \emph{non-cyclic} coordinate permutation $\pi: \C^D \to \C^D$ (with $\pi, \pi^2$ outside the cyclic-shift subgroup so $\pi$ does not commute with $\cconv$), or by adopting inherently non-commutative Generalized Holographic Reduced Representations (GHRR, which lift scalar phasors in $\mathrm{U}(1)^D$ to non-commuting block-unitary matrices in $\mathrm{U}(m)^D$, $m \ge 2$):
+\begin{equation}\label{eq:kg_holographic_trace}
+    \vect{t}_m = \vect{e}_{s_m} \cconv \pi(\vect{e}_{r_m}) \cconv \pi^2(\vect{e}_{o_m}),
+    \qquad
+    \vect{g} = \sum_{m=1}^{M} \vect{t}_m \in \C^D.
+\end{equation}
+Given $\vect{g}$, querying the object associated with subject $s$ and relation $r$ reduces to unbinding via the approximate inverse (circular correlation $\ccorr$) and inverse permutation, $\hat{\vect{e}}_o = \pi^{-2}\!\left(\vect{g} \cconv \inv{(\vect{e}_s \cconv \pi(\vect{e}_r))}\right)$, followed by nearest-neighbor cleanup against the entity codebook.
+A landmark bridge between HRR and large-scale statistical relational learning is \emph{Holographic Embeddings} (HolE)~\cite{NICKEL_2016_HOLE}, which represents compositional subject--object interactions via circular correlation $\vect{e}_s \ccorr \vect{e}_o$ and scores triple plausibility as
+\begin{equation}\label{eq:hole_score}
+    P(s, r, o) = \sigma\!\left(\vect{e}_r\trans \left(\vect{e}_s \ccorr \vect{e}_o\right)\right),
+\end{equation}
+where $\sigma(\cdot)$ is the logistic sigmoid.
+By leveraging the FFT to compute $\vect{e}_s \ccorr \vect{e}_o$ in $\bigo{D \log D}$ time, HolE captures rich non-symmetric relational interactions comparable to bilinear tensor factorization ($\vect{e}_s\trans \mat{W}_r \vect{e}_o$) while reducing per-relation parameter complexity from $\bigo{D^2}$ to $\bigo{D}$.
+
+\paragraph{Multi-Factor Decoding via Resonator Networks.}
+A central computational bottleneck in holographic symbolic reasoning arises when decoding a multi-factor bound composite whose constituent factors are \emph{all} unknown simultaneously.
+Suppose a visual object or symbolic record is encoded as the elementwise (Hadamard or frequency-domain) product of $F$ discrete attributes,
+\begin{equation}\label{eq:multifactor_composite}
+    \vect{s} = \vect{x}_1 \hadamard \vect{x}_2 \hadamard \dots \hadamard \vect{x}_F,
+    \qquad
+    \vect{x}_f \in \mathcal{X}_f = \{\vect{x}_{f,1}, \dots, \vect{x}_{f,M_f}\},
+\end{equation}
+where $\mat{X}_f \in \C^{D \times M_f}$ denotes the codebook matrix for factor $f$ (e.g., object shape, color, horizontal position, and vertical position).
+Because binding destroys similarity to individual factors ($\inner{\vect{s}}{\vect{x}_f} \approx 0$), direct unbinding requires knowing $F - 1$ factors in advance, and brute-force enumeration over the combinatorial product space requires $\prod_{f=1}^F M_f$ similarity evaluations.
+\emph{Resonator Networks}~\cite{FRADY_2020_RESONATOR,KENT_2020_RESONATOR} overcome this exponential barrier by formulating factorization as a coupled dynamical system that searches over superpositions of candidate factors in parallel.
+Initializing each factor estimate $\hat{\vect{x}}_f^{(0)}$ as the normalized bundle of its codebook entries, the resonator iteratively unbinds the current estimates of all other factors and projects the noisy estimate back onto the span of $\mat{X}_f$:
+\begin{equation}\label{eq:resonator_update}
+    \hat{\vect{x}}_f^{(t+1)} = g\!\left(\mat{X}_f \mat{X}_f\herm \left(\vect{s} \hadamard \prod_{j \neq f} \conj{\hat{\vect{x}}_j^{(t)}}\right)\right),
+    \qquad f = 1, \dots, F,
+\end{equation}
+where $g(\cdot)$ applies componentwise normalization (phase projection $z / \abs{z}$ in FHRR or $\operatorname{sign}(\cdot)$ in bipolar VSAs) to maintain unit modulus and drive the trajectory toward valid discrete attractors.
+Empirically and analytically, resonator networks factorize search spaces orders of magnitude larger than optimization-based baselines (such as alternating least squares or gradient descent on relaxed objectives) using only $\bigo{F D \sum_f M_f}$ work per iteration~\cite{KENT_2020_RESONATOR}.
+This mechanism has enabled holographic visual scene parsing---simultaneously disentangling overlapping object identities, poses, and colors from bound latent representations---as well as tree-structure decoding in symbolic manipulation tasks.
+
+\paragraph{Hybrid Neuro-Vector-Symbolic Architectures (NVSA).}
+To scale holographic reasoning to raw high-dimensional perception, recent work pairs deep neural encoders with VSA symbolic backends.
+A prominent exemplar is the Neuro-Vector-Symbolic Architecture (NVSA)~\cite{HERSCHE_2023_NVSA}, evaluated on abstract visual reasoning benchmarks such as Raven's Progressive Matrices (RPM).
+In NVSA, a convolutional or transformer perceptual frontend maps raw image panels into probability distributions over attribute codebooks, forming continuous superpositions of VSA hypervectors that capture perceptual uncertainty.
+A transparent holographic reasoning backend then executes algebraic rule binding, comparison, and arithmetic progression directly in hypervector space---computing, for instance, cyclic shifts or phase differences across matrix rows and columns to infer underlying abstract rules without opaque black-box classifiers.
+This division of labor combines the perceptual power of deep learning with the systematic out-of-distribution generalization, interpretability, and exact variable binding of symbolic AI.
+Remaining challenges include end-to-end calibration between perceptual embeddings and quasi-orthogonal codebooks, as well as capacity saturation when complex visual scenes contain many simultaneously bound entities.
+
+\subsection{Low-Power Edge Computing and Fault-Tolerant Biosignal Processing}\label{sec:applications:edge}
+
+At the opposite end of the computational spectrum from cloud-scale foundation models lies extreme-edge intelligence: wearable medical sensors, autonomous micro-drones, and always-on IoT nodes operating under milliwatt power budgets and kilobyte-scale memory constraints.
+In this regime, Hyperdimensional Computing (HDC)---the binary, bipolar, and integer-quantized branch of VSAs---has emerged as a highly competitive alternative to compressed deep neural networks~\cite{RAHIMI_HDC_EDGE,GE_2020_HDC_CLASSIFICATION,KLEYKO_VSA_SURVEY}.
+
+\paragraph{Single-Pass Algebraic Learning and Hardware-Friendly Primitives.}
+Whereas edge DNN deployment typically requires offline cloud backpropagation followed by aggressive pruning and quantization, HDC supports \emph{single-pass online training} directly on the edge device.
+Given a labeled dataset $\{(\vect{x}_i, y_i)\}_{i=1}^{N}$ with $y_i \in \{1, \dots, C\}$, a deterministic holographic encoder $\phi: \R^{d} \to \{-1,+1\}^D$ maps each input sample to a high-dimensional hypervector by binding orthogonal feature-key vectors $\vect{k}_j$ with continuous level-hypervectors $\vect{l}(x_{i,j})$ (constructed via correlated bit-flipping or fractional phase power encoding) and bundling across features:
+\begin{equation}\label{eq:hdc_encoder}
+    \vect{h}_i = \operatorname{sign}\!\left(\sum_{j=1}^{d} \vect{k}_j \hadamard \vect{l}(x_{i,j})\right).
+\end{equation}
+Class prototypes are then formed in a single streaming pass by bundling all encoded samples belonging to each class, $\vect{c}_y = \sum_{i : y_i = y} \vect{h}_i$, optionally refined via a few lightweight perceptron-style corrective updates when misclassifications occur~\cite{GE_2020_HDC_CLASSIFICATION}.
+Inference classifies a query $\vect{h}_q$ by selecting $\hat{y} = \arg\max_y \inner{\vect{h}_q}{\vect{c}_y} / (\norm{\vect{h}_q}\norm{\vect{c}_y})$.
+In binary or bipolar encodings ($\{0,1\}^D$ or $\{-1,+1\}^D$), binding collapses to single-cycle bitwise XOR, bundling to saturating integer accumulation or majority voting, and similarity measurement to Hamming distance via hardware popcount instructions.
+Eliminating floating-point multiply--accumulate (MAC) pipelines yields massive bit-level parallelism, minimal memory footprint, and order-of-magnitude reductions in training and inference energy on microcontrollers, FPGAs, and custom digital ASICs~\cite{RAHIMI_HDC_EDGE}.
+
+\paragraph{Representative Edge Application Domains.}
+Three application verticals illustrate the breadth of edge HDC deployments:
+\begin{itemize}
+    \item \emph{Wearable biosignal processing:} Real-time hand-gesture classification from multi-channel surface electromyography (EMG), epileptic seizure detection from intracranial and scalp electroencephalography (EEG), and cardiac arrhythmia monitoring from electrocardiography (ECG)~\cite{RAHIMI_HDC_EDGE}. Crucially, HDC achieves competitive accuracy with far fewer training examples than deep CNNs/RNNs and enables rapid on-device recalibration when electrode impedance drifts or sensor placement shifts across sessions.
+    \item \emph{Robotics, sensor fusion, and anomaly detection:} In resource-constrained autonomous agents, HDC enables compact multimodal fusion by binding synchronized descriptors from LiDAR, inertial measurement units (IMUs), tactile arrays, and lightweight visual backbones into unified episodic state hypervectors for visual place recognition, reactive control, and real-time fault detection~\cite{NEUBERT_2019_HDC_ROBOTICS}.
+    \item \emph{Genomic sequence analysis:} Aligning DNA/RNA reads via conventional Smith--Waterman dynamic programming scales quadratically with sequence length. HDC genomics accelerators (such as GenieHD~\cite{KIM_2020_GENIEHD}) encode nucleotide $k$-mers into fixed-dimensional hypervectors via permutation-bound $n$-grams, $\vect{h}_{k\text{-mer}} = \prod_{j=0}^{k-1} \rho^j(\vect{b}_{c_j})$, and bundle entire reference databases into superimposed signatures, accelerating pattern-matching throughput by orders of magnitude with minimal hardware area.
+\end{itemize}
+
+\paragraph{Intrinsic Hardware Fault Tolerance and In-Memory Computing (IMC).}
+A defining physical advantage of holographic coding is its extreme robustness to hardware noise and permanent device faults.
+Because every concept is distributed uniformly across all $D$ coordinates with equal statistical weight, no single bit carries disproportionate semantic importance---in sharp contrast to floating-point exponents or most-significant bits in conventional neural network weights.
+Formally, if independent channel or memory bit-flips invert each coordinate of a bipolar hypervector $\vect{h} \in \{-1,+1\}^D$ with probability $p \in [0, 0.5)$, the expected inner product with a clean prototype scales linearly by $(1 - 2p)$ while the corruption variance remains $\bigo{D}$.
+Consequently, for $D \sim 10^4$, classification accuracy remains virtually unchanged even at bit-error rates (BERs) of $10\text{--}30\%$, a regime where standard quantized DNNs suffer complete collapse~\cite{RAHIMI_HDC_EDGE,KARUNARATNE_2020_PCM_HDC}.
+
+This resilience unlocks direct co-design with emerging \emph{analog in-memory computing} (IMC) fabrics based on non-volatile memory technologies such as Phase-Change Memory (PCM) and Resistive RAM (RRAM)~\cite{KARUNARATNE_2020_PCM_HDC}.
+In crossbar IMC arrays, storing class prototypes or random projection keys as analog device conductances allows dot products $\inner{\vect{h}_q}{\vect{c}_y}$ to be evaluated in $\bigo{1}$ time via Ohm's law and Kirchhoff's current summation, eliminating the von Neumann memory-wall bottleneck.
+While analog PCM/RRAM devices inherently suffer from temporal conductance drift, read noise, limited bit precision, and stuck-at manufacturing defects that severely degrade conventional DNN accuracy, the high-dimensional holographic geometry of HDC absorbs these non-idealities natively---enabling complete on-chip end-to-end learning and inference at sub-microjoule energy per query~\cite{KARUNARATNE_2020_PCM_HDC}.
+
+\subsection{Photonic and Optical AI Accelerators}\label{sec:applications:photonics}
+
+Perhaps the deepest synergy between algorithm and physics in this survey arises in \emph{coherent photonic and optical computing}.
+Electronic digital processors are fundamentally optimized for real-valued binary switching; representing complex numbers $z = \lambda e^{i\theta} \in \C$ in CMOS requires pairs of real registers, four real multiplications per complex product, and explicit memory movement for every intermediate result.
+Coherent optical hardware reverses this asymmetry entirely: electromagnetic wavefields are \emph{natively complex-valued}, making complex holographic algebra a direct consequence of physical wave propagation~\cite{WETZSTEIN_2020_OPTICAL_AI,MCMAHON_2023_PHYSICS_OPTICAL_NN}.
+
+\paragraph{Physical Isomorphism Between Optical Wavefields and Holographic Algebra.}
+A monochromatic coherent optical beam with spatial amplitude $A(\vect{r})$ and optical phase $\theta(\vect{r})$ is described by the complex scalar phasor $E(\vect{r}) = A(\vect{r}) e^{i\theta(\vect{r})} \in \C$.
+Under linear optical propagation, the fundamental primitives of HNNs and complex VSAs correspond one-to-one with passive, speed-of-light physical phenomena:
+\begin{enumerate}
+    \item \emph{Bundling (superposition):} Coherent interference of overlapping wavefronts naturally sums complex amplitudes, $E_{\text{tot}}(\vect{r}) = \sum_{n=1}^{N} E_n(\vect{r})$, with zero switching energy.
+    \item \emph{Frequency-domain binding ($\hadamard$):} Transmitting a wavefront through a spatially varying refractive index profile---implemented via a liquid-crystal Spatial Light Modulator (SLM) or fixed phase mask---imparts a position-dependent phase delay $\phi(\vect{r})$, executing elementwise complex modulation $E'(\vect{r}) = E(\vect{r}) e^{i\phi(\vect{r})}$.
+    \item \emph{Fourier transforms ($\DFT / \IDFT$) and circular convolution ($\cconv$):} Under paraxial Fraunhofer diffraction, a thin spherical lens of focal length $f$ computes an exact two-dimensional spatial Fourier transform between its front and back focal planes in a single optical transit. Cascading two lenses with a programmable phase mask placed in the intermediate Fourier plane forms a classic $4f$ optical correlator, physically realizing circular convolution $\vect{x} \cconv \vect{y} = \IDFT\{\DFT\{\vect{x}\} \hadamard \DFT\{\vect{y}\}\}$ and correlation $\ccorr$ across millions of parallel spatial modes at optical carrier bandwidths.
+\end{enumerate}
+
+\paragraph{Integrated Silicon Photonics and Mach--Zehnder Interferometer (MZI) Meshes.}
+For chip-scale, CMOS-compatible integration, coherent nanophotonic processors encode complex input vectors $\vect{x} \in \C^D$ across $D$ parallel optical waveguides and execute programmable linear transformations using rectangular or triangular meshes of $2 \times 2$ Mach--Zehnder Interferometers (MZIs)~\cite{SHEN_PHOTONIC_MZI,CLEMENTS_2016_MZI}.
+Each MZI comprises two 50:50 directional couplers and two tunable phase shifters $(\theta, \phi)$ (typically thermo-optic or electro-optic), implementing the exact $2 \times 2$ complex unitary transfer matrix (in the Clements parameterization~\cite{CLEMENTS_2016_MZI}):
+\begin{equation}\label{eq:mzi_unitary}
+    \mat{T}_{\text{MZI}}(\theta, \phi) = i e^{i\theta/2}
+    \begin{pmatrix}
+        e^{i\phi}\sin(\theta/2) & \cos(\theta/2) \\
+        e^{i\phi}\cos(\theta/2) & -\sin(\theta/2)
+    \end{pmatrix}
+    \in \mathrm{U}(2).
+\end{equation}
+By cascading $\frac{D(D-1)}{2}$ MZIs in a rectangular mesh of optical depth $D$, any arbitrary complex unitary operator $\mat{U} \in \mathrm{U}(D)$ can be physically synthesized~\cite{CLEMENTS_2016_MZI}; combining two unitary meshes with a diagonal array of optical attenuators or amplifiers realizes any general complex matrix via its Singular Value Decomposition $\mat{W} = \mat{U}\mat{\Sigma}\mat{V}\herm$~\cite{SHEN_PHOTONIC_MZI}.
+This architecture aligns remarkably well with complex holographic computing: unitary binding operators, orthogonal holographic projections, unitary recurrent layers~\cite{ARJOVSKY_2016_URNN}, and norm-preserving CVNN blocks~\cite{BASSEY_CVNN_SURVEY,TRABELSI_2018_DCN} map directly onto a single unitary MZI mesh without requiring lossy optical attenuation stages, executing $\bigo{D^2}$ complex operations passively in the picosecond propagation time of light across the die.
+
+\paragraph{Diffractive Deep Neural Networks ($\text{D}^2\text{NN}$) and Free-Space Optics.}
+While waveguide MZI meshes excel in compact integrated form factors, their on-chip footprint scales quadratically ($\bigo{D^2}$ interferometers) with vector dimension.
+Free-space diffractive architectures overcome this planar scaling barrier by exploiting three-dimensional volumetric propagation.
+In Diffractive Deep Neural Networks ($\text{D}^2\text{NN}$)~\cite{LIN_DIFFRACTIVE_OPTICAL_NN}, a sequence of passive transmissive phase masks---fabricated via 3D printing at terahertz wavelengths or photolithography at optical wavelengths---serves as complex-valued neural layers.
+Each pixel (diffractive neuron) modulates the phase (and optionally amplitude) of the incident wavefield, and free-space Rayleigh--Sommerfeld diffraction naturally provides dense, all-to-all complex connectivity to the subsequent layer.
+Trained offline via backpropagation through a differentiable physical wave-propagation simulator, $\text{D}^2\text{NN}$s perform complex-valued inference across tens of thousands of spatial neurons at the speed of light with zero active compute power beyond the illumination source~\cite{LIN_DIFFRACTIVE_OPTICAL_NN}.
+Closely related free-space $4f$ optical processors directly execute high-dimensional holographic binding and correlation for VSA/HDC pattern matching and optical convolutional layers~\cite{WETZSTEIN_2020_OPTICAL_AI}.
+
+\begin{table}[htbp]
+\centering
+\caption{Hardware Co-Design Comparison Across Primary Execution Substrates for Holographic and Vector-Symbolic Computing.}
+\label{tab:hardware_substrates}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.24}
+\begin{tabularx}{\textwidth}{@{} >{\raggedright\arraybackslash}p{2.25cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X @{}}
+\toprule
+\textbf{Dimension} & \textbf{Digital Edge CMOS (MCU / FPGA / ASIC)} & \textbf{Analog In-Memory Computing (RRAM / PCM)} & \textbf{Coherent Photonics (MZI Mesh / $\text{D}^2\text{NN}$ / $4f$)} \\
+\midrule
+Physical Representation & Binary $\{0,1\}^D$, bipolar $\{-1,+1\}^D$, or low-bit int & Conductance states $G_{ij}$ and analog currents/voltages & Complex optical wavefields $A(\vect{r})e^{i\theta(\vect{r})} \in \C$ \\
+\addlinespace[2pt]
+Native Holographic Primitive & Bitwise XOR binding; popcount similarity; integer bundling & $\bigo{1}$-time crossbar inner products \& key projections & Passive interference (bundling), phase masks ($\hadamard$), lens $\DFT$/$\cconv$ \\
+\addlinespace[2pt]
+Latency \& Energy Profile & $\mu\text{s}$--$\text{ms}$ latency; $\mu\text{J}$--$\text{mJ}$/query; zero multiplier overhead & $\text{ns}$--$\mu\text{s}$ latency; sub-$\mu\text{J}$/query; eliminates memory wall & $\text{ps}$--$\text{ns}$ optical transit; near-zero passive linear compute energy \\
+\addlinespace[2pt]
+Noise \& Fault Behavior & Deterministic; immune to aggressive bit-width reduction & Conductance drift, device variability, stuck-at faults (absorbed by HDC) & Shot noise, thermal phase drift, optical insertion loss, calibration error \\
+\addlinespace[2pt]
+Primary Engineering Bottleneck & SRAM capacity for large $D$ and codebook storage & Analog ADC/DAC periphery area; write endurance & O--E--O conversion (ADC/DAC), optical nonlinearities, waveguide footprint \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{System-Level Electro-Optic Bottlenecks.}
+Despite the compelling physical elegance of optical holography (summarized alongside digital edge and analog IMC substrates in Table~\ref{tab:hardware_substrates}), critical engineering hurdles currently prevent photonic processors from displacing electronic GPUs for general-purpose deep learning~\cite{WETZSTEIN_2020_OPTICAL_AI,MCMAHON_2023_PHYSICS_OPTICAL_NN}:
+\begin{itemize}
+    \item \emph{Electro-optic conversion overhead:} Electronic--optical--electronic (E--O--E) interfaces---high-speed digital-to-analog converters (DACs), electro-optic modulators, photodetectors, and analog-to-digital converters (ADCs)---frequently dominate both system power consumption and end-to-end latency. Photonic acceleration yields net energy savings only when the linear optical fan-in $D$ or optical compute depth is large enough to amortize E--O--E conversion costs across $\bigo{D^2}$ or $\bigo{D \log D}$ operations.
+    \item \emph{Optical nonlinearity realization:} While linear wave superposition and unitary interference are passive, implementing strong, low-power, compact all-optical activation functions (needed for cleanup projections, resonator thresholding, or deep nonlinear layers) remains physically difficult due to weak optical Kerr nonlinearities at low intensities. Most current systems revert to hybrid opto-electronic nonlinearities, re-introducing E--O--E bottlenecks at every layer.
+    \item \emph{Thermal phase drift, insertion loss, and calibration:} Thermo-optic MZI phase shifters consume milliwatts of static holding power per interferometer and induce thermal crosstalk across adjacent waveguides, while cumulative insertion loss limits practical cascade depth. Non-volatile phase-change photonic materials and holographic fault-tolerant encodings offer promising mitigations.
+    \item \emph{Footprint and programmability trade-offs:} Integrated waveguide meshes are bounded in dimension $D$ by millimeter-scale interferometer footprints, whereas free-space $\text{D}^2\text{NN}$s achieve massive parallelism ($D \sim 10^4\text{--}10^6$) but rely on slow refresh-rate SLMs or fixed fabricated masks that hinder rapid weight updates. Scaling toward foundation-model workloads therefore demands multiplexing across wavelength (WDM), time, and spatial modes coupled with algorithm--hardware co-design.
+\end{itemize}

@@ -1,0 +1,167 @@
+% ==============================================================================
+% figures/fig_algebra.tex
+% Algebraic Operations in Complex Phase Space (Bundling, Binding, Unbinding)
+% Included via \input{figures/fig_algebra} inside a figure environment.
+% Requires TikZ libraries: positioning, arrows.meta, shapes.geometric, fit, calc,
+% backgrounds; and Okabe-Ito colors + math macros from main.tex.
+% ==============================================================================
+\begin{tikzpicture}[
+    >=Stealth,
+    node distance=0.65cm and 0.72cm,
+    every node/.style={font=\footnotesize},
+    box/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=okabeSlate,
+        line width=0.8pt,
+        fill=white,
+        align=center,
+        inner sep=5pt,
+        minimum height=1.25cm
+    },
+    inputbox/.style={
+        box,
+        draw=okabeNavy,
+        fill=okabeNavy!6,
+        text width=2.35cm
+    },
+    bindbox/.style={
+        box,
+        draw=okabeTeal,
+        fill=okabeTeal!8,
+        text width=2.85cm
+    },
+    membox/.style={
+        box,
+        draw=okabeAmber!85!black,
+        fill=okabeAmber!12,
+        text width=3.15cm
+    },
+    decompbox/.style={
+        box,
+        draw=okabeCoral,
+        fill=okabeCoral!7,
+        text width=3.15cm
+    },
+    outbox/.style={
+        box,
+        draw=okabeNavy,
+        fill=okabeSky!12,
+        text width=2.45cm
+    },
+    flow/.style={
+        ->,
+        line width=0.9pt,
+        draw=okabeSlate
+    },
+    memflow/.style={
+        ->,
+        line width=1.1pt,
+        draw=okabeAmber!85!black
+    },
+    band/.style={
+        rounded corners=5pt,
+        dashed,
+        line width=0.7pt,
+        inner sep=7pt
+    }
+]
+
+% ==============================================================================
+% TOP ROW: WRITE / ENFOLDING PATH (Phasor Encoding -> Binding -> Bundling)
+% ==============================================================================
+\node[inputbox] (inputs) {%
+    \textbf{\color{okabeNavy}Key--Value Pairs}\\[2pt]
+    $\vect{k}_n, \vect{v}_n \in \C^D$\\
+    {\scriptsize $\xrightarrow{\;\DFT\;}\vect{K}_n, \vect{V}_n \in \mathbb{T}^D$}%
+};
+
+\node[bindbox, right=of inputs] (binding) {%
+    \textbf{\color{okabeTeal}Binding ($\cconv \leftrightarrow \hadamard$)}\\[2pt]
+    $\vect{K}_n \hadamard \vect{V}_n$\\
+    {\scriptsize $e^{i(\phi_{n,\omega}+\psi_{n,\omega})}$, $\bigo{D}$}%
+};
+
+\node[membox, right=of binding] (bundling) {%
+    \textbf{\color{okabeAmber!75!black}Superposition (Bundling)}\\[2pt]
+    $\vect{M} = \sum_{n=1}^{N} \vect{K}_n \hadamard \vect{V}_n$\\
+    {\scriptsize Fixed trace $\in \C^D$, $\bigo{1}$ in $N$}%
+};
+
+% Mini Unit-Circle Phasor Inset (positioned relative to bundling)
+\node[box, draw=okabeSlate!70, fill=white, right=of bundling, minimum width=2.45cm, minimum height=1.55cm] (phasor_frame) {};
+\begin{scope}[shift={(phasor_frame.center)}, yshift=-0.12cm]
+    \draw[okabeSlate!40, thin] (-0.65,0) -- (0.65,0);
+    \draw[okabeSlate!40, thin] (0,-0.55) -- (0,0.55);
+    \draw[okabeSlate!70, thin] (0,0) circle (0.46cm);
+    % Key phasor (navy)
+    \draw[->, okabeNavy, line width=0.9pt] (0,0) -- (32:0.46cm)
+        node[right, inner sep=1pt, font=\tiny, text=okabeNavy] {$\phi$};
+    % Value phasor (sky/purple)
+    \draw[->, okabePurple!90!black, line width=0.9pt] (0,0) -- (85:0.46cm)
+        node[above, inner sep=1pt, font=\tiny, text=okabePurple!90!black] {$\psi$};
+    % Bound phasor (teal)
+    \draw[->, okabeTeal, line width=1.1pt] (0,0) -- (117:0.46cm)
+        node[left, inner sep=1pt, font=\tiny, text=okabeTeal] {$\phi{+}\psi$};
+\end{scope}
+\node[anchor=north, font=\scriptsize\bfseries, text=okabeSlate, inner sep=2pt] at (phasor_frame.north) {Phase Sum on $\mathbb{T}$};
+
+% ==============================================================================
+% BOTTOM ROW: READ / UNBINDING PATH (Query -> Unbinding -> Crosstalk -> Clean-up)
+% ==============================================================================
+\node[inputbox, below=1.35cm of inputs] (query) {%
+    \textbf{\color{okabeNavy}Query Key}\\[2pt]
+    $\vect{k}_q \xrightarrow{\;\DFT\;} \vect{K}_q$\\
+    {\scriptsize Conjugate $\conj{\vect{K}}_q$ ($e^{-i\phi_{q,\omega}}$)}%
+};
+
+\node[bindbox, right=of query] (unbinding) {%
+    \textbf{\color{okabeTeal}Unbinding ($\ccorr \leftrightarrow \hadamard$)}\\[2pt]
+    $\hat{\vect{V}}_q = \conj{\vect{K}}_q \hadamard \vect{M}$\\
+    {\scriptsize Involution $\inv{\vect{k}}_q \cconv \vect{m}$}%
+};
+
+\node[decompbox, right=of unbinding] (decomp) {%
+    \textbf{\color{okabeCoral}Signal + Crosstalk}\\[2pt]
+    $\hat{\vect{V}}_q = {\color{okabeTeal}\vect{V}_q} + {\color{okabeCoral}\vect{H}_q}$\\
+    {\scriptsize $\SNR \propto D / N$,\; $\vect{\eta}_q = \IDFT(\vect{H}_q)$}%
+};
+
+\node[outbox, right=of decomp] (cleanup) {%
+    \textbf{\color{okabeNavy}Readout / Clean-Up}\\[2pt]
+    $\arg\max_{\vect{V} \in \mathcal{V}} \Real\inner{\vect{V}}{\hat{\vect{V}}_q}$\\
+    {\scriptsize $\IDFT \rightarrow \hat{\vect{v}}_q \approx \vect{v}_q$}%
+};
+
+% ==============================================================================
+% ARROWS & ROUTING
+% ==============================================================================
+% Top row flows
+\draw[flow] (inputs) -- (binding);
+\draw[flow] (binding) -- (bundling);
+\draw[flow, dashed, draw=okabeSlate!65] (bundling) -- (phasor_frame);
+
+% Bottom row flows
+\draw[flow] (query) -- (unbinding);
+\draw[flow] (unbinding) -- (decomp);
+\draw[flow] (decomp) -- (cleanup);
+
+% Bridge arrow from Bundling (Write) to Unbinding (Read) through middle channel
+\coordinate (mid_channel) at ($(bundling.south)!0.48!(decomp.north)$);
+\draw[memflow] (bundling.south) -- (mid_channel)
+    -| node[pos=0.25, above, font=\scriptsize, text=okabeAmber!75!black, inner sep=2pt]
+    {Superposed Trace $\vect{M}$} (unbinding.north);
+
+% ==============================================================================
+% BACKGROUND GROUPING BANDS
+% ==============================================================================
+\begin{scope}[on background layer]
+    \node[band, draw=okabeNavy!45, fill=okabeLightBg,
+          fit=(inputs)(binding)(bundling)(phasor_frame),
+          label={[anchor=south west, font=\scriptsize\bfseries, text=okabeNavy]north west:Write Path: Frequency-Domain Binding \& Additive Superposition}] (write_band) {};
+    \node[band, draw=okabeTeal!55, fill=okabeLightBg,
+          fit=(query)(unbinding)(decomp)(cleanup),
+          label={[anchor=north west, font=\scriptsize\bfseries, text=okabeTeal!85!black]south west:Read Path: Correlation Unbinding, Crosstalk Noise $\vect{\eta}_q$, \& Codebook Clean-Up}] (read_band) {};
+\end{scope}
+
+\end{tikzpicture}

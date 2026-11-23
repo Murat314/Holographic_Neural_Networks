@@ -1,0 +1,196 @@
+\section{Future Potentials and Open Research Challenges}\label{sec:potentials}
+
+While holographic neural representations and Vector Symbolic Architectures (VSAs) have demonstrated compelling efficiency in specialized neuro-symbolic reasoning, ultra-low-power edge inference, and optical computing prototypes, their most transformative impact may lie in addressing the structural limitations of contemporary foundation-scale artificial intelligence.
+Modern frontier models---dominated by dense autoregressive Transformers~\cite{VASWANI_TRANSFORMER}---confront three converging bottlenecks: the linearly expanding memory and bandwidth cost of exact key--value (KV) caching over million-token horizons, brittle factual grounding manifested as fluent statistical hallucination, and catastrophic forgetting under continual adaptation.
+In this section, we examine how complex phase-space superposition provides mathematically principled remedies to each of these failure modes (Sections~\ref{sec:potentials:kvcache}--\ref{sec:potentials:continual}), and we critically analyze the theoretical, optimization, systems, and benchmarking obstacles that currently constrain large-scale adoption (Section~\ref{sec:potentials:challenges}).
+
+% ==============================================================================
+\subsection{Holographic \texorpdfstring{$\bigo{1}$}{O(1)} KV-Caches for Long-Context Foundation Models}\label{sec:potentials:kvcache}
+% ==============================================================================
+
+\paragraph{The Memory-Bandwidth Wall of Exact KV-Caching.}
+During autoregressive decoding across a Transformer with $L$ layers, $H$ attention heads, per-head dimension $d_h$, and context length $N$, caching past key and value projections incurs $\bigo{L H N d_h}$ memory capacity and requires streaming $\bigo{N}$ cached vectors from high-bandwidth memory (HBM) for every newly generated token.
+At million-token context lengths ($N \ge 10^6$), KV-cache storage rapidly exceeds on-device memory budgets and drives decoding into a strictly memory-bandwidth-bound regime where arithmetic units sit idle.
+Sub-quadratic sequence architectures---including kernelized linear attention~\cite{KATHAROPOULOS_2020_LINEAR_TRANSFORMER} and selective State-Space Models (SSMs)~\cite{GU_SSM_S4_MAMBA}---alleviate this bottleneck by compressing token history into a fixed-size recurrent state of $\bigo{1}$ memory complexity with respect to $N$.
+However, both theoretical capacity analyses and empirical recall evaluations reveal a persistent fidelity gap between fixed-state recurrent models and exact self-attention on verbatim copying, long-range associative recall, and needle-in-a-haystack retrieval~\cite{JELASSI_2024_REPEAT_AFTER_ME,ARORA_2023_ZOOLOGY}.
+
+\paragraph{Complex Holographic Memory Bank Formulation (Conceptual Blueprint).}
+We present the following hybrid $\bigo{1}$ holographic KV-cache explicitly as a \emph{conceptual architectural blueprint and theoretical capacity roadmap}---synthesizing unitary FHRR binding, selective SSM gating, and sliding-window attention~\cite{HOLOGRAPHIC_ATTENTION_OR_KV_CACHE}---rather than as an empirically benchmarked drop-in replacement for production Transformer KV-caches.
+Rather than discarding evicted tokens or compressing them through unstructured real-valued outer-product accumulators, distant context tokens are folded into a fixed-size complex holographic memory bank $\mat{M}_t \in \C^{K \times D}$ comprising $K$ parallel memory slots (or frequency-multiplexed channels) of complex dimension $D$, with $K \ll N$.
+At time step $t$, rather than enforcing unit modulus in the time domain---whose DFT $\hat{\vect{k}}_t^{(r)} = \DFT(\vect{k}_t^{(r)})$ would lose unit spectral magnitudes ($\abs{\hat{k}_{t,\omega}^{(r)}} \neq 1$), re-introducing self-distortion while incurring $\bigo{K D \log D}$ per-step FFT overhead---a learned complex phase encoder parameterizes slot-specific keys directly on the \emph{spectral torus} $\hat{\vect{k}}_t^{(r)} = \exp\!\bigl(i\vect{\phi}_k^{(r)}(\vect{h}_t)\bigr) \in \mathbb{T}^D = \{\vect{z} \in \C^D : \abs{z_\omega} = 1\}$ (defining unitary circulant kernels $\vect{k}_t^{(r)} = \IDFT(\hat{\vect{k}}_t^{(r)})$), alongside spectral values $\hat{\vect{v}}_t^{(r)} \in \C^D$ (with $\vect{v}_t^{(r)} = \IDFT(\hat{\vect{v}}_t^{(r)})$) and selective retention and write gates $\gamma_t^{(r)}, \beta_t^{(r)} \in (0, 1)$ for each slot $r \in \{1, \dots, K\}$.
+In the time domain, each slot implements gated holographic binding and bundling:
+\begin{equation}\label{eq:holo_kv_update}
+    \vect{m}_t^{(r)} = \gamma_t^{(r)} \vect{m}_{t-1}^{(r)} + \beta_t^{(r)} \left(\vect{k}_t^{(r)} \cconv \vect{v}_t^{(r)}\right), \qquad r = 1, \dots, K,
+\end{equation}
+where circular convolution $\cconv$ binds each key--value pair into a distributed phase interference pattern.
+Maintaining the memory bank natively in the spectral domain $\hat{\vect{m}}_t^{(r)} = \DFT(\vect{m}_t^{(r)})$ executes~\eqref{eq:holo_kv_update} directly via elementwise Hadamard modulation without per-step FFTs:
+\begin{equation}\label{eq:holo_kv_fft}
+    \hat{\vect{m}}_t^{(r)} = \gamma_t^{(r)} \hat{\vect{m}}_{t-1}^{(r)} + \beta_t^{(r)} \left(\hat{\vect{k}}_t^{(r)} \hadamard \hat{\vect{v}}_t^{(r)}\right),
+\end{equation}
+requiring strictly $\bigo{K D}$ complex multiply--accumulate operations per step and $\bigo{K D} = \bigo{1}$ total memory in sequence length $N$.
+
+Given an incoming query parameterized directly on the spectral torus, $\hat{\vect{q}}_t^{(r)} \in \mathbb{T}^D$ (with $\vect{q}_t^{(r)} = \IDFT(\hat{\vect{q}}_t^{(r)})$), associative retrieval corresponds to circular correlation $\ccorr$ and executes in $\bigo{K D}$ spectral operations via conjugate Hadamard unbinding $\hat{\tilde{\vect{v}}}_t^{(r)} = \conj{\hat{\vect{q}}_t^{(r)}} \hadamard \hat{\vect{m}}_t^{(r)}$ (eliminating per-step $\IDFT$ calls when downstream clean-up operates in spectral coordinates, with time-domain equivalent $\tilde{\vect{v}}_t^{(r)} = \IDFT(\hat{\tilde{\vect{v}}}_t^{(r)})$):
+\begin{align}\label{eq:holo_kv_read}
+    \tilde{\vect{v}}_t^{(r)}
+    &= \vect{q}_t^{(r)} \ccorr \vect{m}_t^{(r)}
+     = \IDFT\!\left(\conj{\hat{\vect{q}}_t^{(r)}} \hadamard \hat{\vect{m}}_t^{(r)}\right) \nonumber\\
+    &= w_{t,j^*}^{(r)} \vect{v}_{j^*}^{(r)}
+       + \underbrace{\sum_{\substack{j \le t \\ j \neq j^*}} w_{t,j}^{(r)} \left(\vect{q}_t^{(r)} \ccorr \vect{k}_j^{(r)}\right) \cconv \vect{v}_j^{(r)}}_{\vect{\eta}_t^{(r)} \text{ (superposition crosstalk)}},
+\end{align}
+where exact self-distortion-free recovery of $w_{t,j^*}^{(r)}\vect{v}_{j^*}^{(r)}$ holds because $\conj{\hat{\vect{k}}_{j^*}^{(r)}} \hadamard \hat{\vect{k}}_{j^*}^{(r)} = \vect{1}$ on $\mathbb{T}^D$, $w_{t,j}^{(r)} = \beta_j^{(r)} \prod_{s=j+1}^{t} \gamma_s^{(r)}$ denotes the cumulative retention weight of token $j$ in slot $r$, and $j^*$ indexes a matching stored key ($\hat{\vect{q}}_t^{(r)} \approx \hat{\vect{k}}_{j^*}^{(r)}$).
+Because exponential decay bounds the effective number of active superposed tokens in slot $r$ to $N_{\mathrm{eff}}^{(r)} \approx \bigl(1 - (\bar{\gamma}^{(r)})^2\bigr)^{-1}$, spacing the base decay rates $\{\bar{\gamma}^{(r)}\}_{r=1}^{K}$ logarithmically across slots establishes a multi-timescale memory hierarchy---ranging from high-$\SNR$ medium-range episodic slots to slowly decaying global semantic traces---directly echoing the multi-timescale diagonal complex recurrences of structured SSMs~\cite{GU_SSM_S4_MAMBA}.
+
+\paragraph{Hierarchical Hybrid Attention Design.}
+Crucially, holographic memory need not replace exact self-attention wholesale; instead, the two mechanisms exhibit complementary strengths that motivate a hierarchical hybrid architecture (Figure~\ref{fig:hybrid_arch}).
+In this design, each backbone layer maintains a bounded exact sliding-window KV-buffer over the most recent $W \ll N$ tokens ($[t-W+1, t]$), preserving lossless verbatim retrieval, fine-grained syntactic copying, and exact needle recall within the active working horizon at $\bigo{W}$ cost.
+As tokens age out of the sliding window at step $t - W$, an eviction handoff routes their representations into the parallel Holographic $\bigo{1}$ Superposition Memory Module, folding distant context into $\mat{M}_t$ rather than discarding it.
+Raw unbound readouts $\tilde{\vect{v}}_t = \{\tilde{\vect{v}}_t^{(r)}\}_{r=1}^{K}$ pass through a learned clean-up and $\SNR$-aware projection module (for example, a gated residual MLP, a Hopfield-style attractor step~\cite{RAMSAUER_MODERN_HOPFIELD}, or an iterative resonator denoiser~\cite{FRADY_2020_RESONATOR}) to suppress crosstalk $\vect{\eta}_t$ and produce a denoised long-range readout $\vect{y}_t^{\mathrm{hol}}$.
+Finally, an input-dependent fusion gate $\vect{g}_t = \sigma(\mat{W}_g \vect{h}_t)$ dynamically arbitrates between local exact attention $\vect{y}_t^{\mathrm{loc}}$ and holographic recall $\vect{y}_t^{\mathrm{hol}}$:
+\begin{equation}\label{eq:hybrid_fusion}
+    \vect{y}_t = \vect{g}_t \hadamard \vect{y}_t^{\mathrm{loc}} + (\vect{1} - \vect{g}_t) \hadamard \vect{y}_t^{\mathrm{hol}},
+\end{equation}
+before re-entering the residual backbone stream.
+This hybrid allocation concentrates exact quadratic attention where local verbatim precision is indispensable, while delegating global semantic and episodic recall over arbitrarily long horizons to constant-size holographic superposition.
+Relative to existing efficient-memory designs, this spectral-torus roadmap occupies a distinct algebraic niche: whereas compressive HRR attention~\cite{HOLOGRAPHIC_ATTENTION_OR_KV_CACHE} applies real-valued circular convolution within attention heads and DeltaNet/Gated DeltaNet~\cite{YANG_2024_DELTANET,YANG_2025_GATED_DELTANET} sharpen real $\bigo{D^2}$ outer-product states via delta-rule erasure and gating,~\eqref{eq:holo_kv_fft}--\eqref{eq:hybrid_fusion} targets $\bigo{KD}$ unitary phase traces with distortion-free conjugate unbinding and explicit $\SNR$-aware clean-up.
+Compared with recent local-attention/recurrent hybrids---Griffin's real gated linear recurrences~\cite{DE_2024_GRIFFIN} and Titans' test-time neural memory updated via surprise-driven momentum~\cite{BEHROUZ_2025_TITANS}---complex holographic slots provide non-iterative algebraic key--value binding with native coherent-photonic hardware affinity.
+Moreover, lifting scalar phasors in~\eqref{eq:holo_kv_fft} to block-unitary GHRR elements~\cite{YEUNG_2024_GHRR} offers a principled path to non-commutative order-sensitive memory when sequence structure cannot be captured by commutative phase addition alone.
+Importantly, while~\eqref{eq:holo_kv_fft}--\eqref{eq:hybrid_fusion} establish clear per-step complexity ($\bigo{KD}$) and analytical $\SNR$ budgeting derived from Section~\ref{sec:math}, full end-to-end training stability, fused GPU kernel efficiency, and empirical long-context validation on standardized retrieval stress tests---most notably RULER~\cite{HSIEH_2024_RULER} and BABILong~\cite{KURATOV_2024_BABILONG}---remain open future work (see Section~\ref{sec:potentials:challenges}).
+
+\begin{figure}[t]
+    \centering
+    \resizebox{\linewidth}{!}{\input{figures/fig_hybrid_arch}}
+    \caption{Conceptual blueprint of a future hybrid foundation-model block combining a bounded local exact sliding-window attention buffer ($\bigo{W}$ memory for verbatim local recall) with a parallel Holographic $\bigo{1}$ Superposition Memory Module. Tokens evicted from the sliding window at step $t-W$ are mapped directly onto spectral-torus phasor keys $\hat{\vect{k}}_t \in \mathbb{T}^D$ and spectral values $\hat{\vect{v}}_t \in \C^D$, bound in $\bigo{KD}$ via elementwise Hadamard modulation ($\hat{\vect{k}}_t \hadamard \hat{\vect{v}}_t \leftrightarrow \vect{k}_t \cconv \vect{v}_t$), and accumulated into a multi-timescale gated spectral trace $\hat{\mat{M}}_t \in \C^{K \times D}$. Incoming spectral queries $\hat{\vect{q}}_t \in \mathbb{T}^D$ retrieve superposed associations via conjugate Hadamard unbinding ($\conj{\hat{\vect{q}}_t} \hadamard \hat{\mat{M}}_t \leftrightarrow \vect{q}_t \ccorr \mat{M}_t$), followed by crosstalk clean-up and adaptive gated fusion with the local exact attention output $\vect{y}_t^{\mathrm{loc}}$.}
+    \label{fig:hybrid_arch}
+\end{figure}
+
+\paragraph{Learned Phase Keys, Generalized RoPE, and Key Orthogonalization.}
+A particularly promising theoretical bridge links holographic KV-caching to Rotary Position Embeddings (RoPE)~\cite{SU_2024_ROPE}.
+RoPE applies block-diagonal $2\times 2$ orthogonal rotations---isomorphic to elementwise multiplication by unit-modulus complex phasors $\exp(i m \theta_j)$---so that inner products depend solely on relative phase offsets $\exp(i(m-n)\theta_j)$.
+From the perspective of Fourier Holographic Reduced Representations (FHRR)~\cite{PLATE_1995_HRR,SCHLEGEL_VSA_COMPARISON}, RoPE is a special case of \emph{data-independent positional phase binding}.
+Holographic KV-caches generalize this mechanism in two directions: first, by learning \emph{content- and context-dependent spectral phase rotations} $\hat{\vect{k}}_t = \exp(i \vect{\phi}(\vect{h}_t)) \in \mathbb{T}^D$ coupled with selective input-dependent decay gates (unifying unitary complex recurrence~\cite{ARJOVSKY_2016_URNN} with selective SSM gating~\cite{GU_SSM_S4_MAMBA}); and second, by introducing \emph{interference-minimizing key orthogonalization}.
+Under unregularized random keys, crosstalk variance scales as $\bigo{N_{\mathrm{eff}}/D}$.
+However, incorporating a mutual-coherence auxiliary penalty $\mathcal{L}_{\mathrm{coh}} = \sum_{j \neq j'} \abs{\inner{\hat{\vect{k}}_j}{\hat{\vect{k}}_{j'}}}^2$ alongside sparse content-based slot routing (assigning semantically distinct keys to disjoint subsets of the $K$ memory slots via phase hashing) drives keys toward quasi-orthogonal Welch-bound constellations, substantially increasing usable context capacity without enlarging $D$.
+
+% ==============================================================================
+\subsection{Hallucination-Reduced and Verifiable Neuro-Symbolic Reasoning}\label{sec:potentials:reasoning}
+% ==============================================================================
+
+\paragraph{Explicit Algebraic Binding vs.\ Implicit Statistical Entanglement.}
+A primary structural driver of hallucinations in dense Large Language Models (LLMs) is the lack of explicit variable binding.
+In standard dense networks, factual associations, entity attributes, and contextual predicates are stored in polysemantic neurons via implicit, unstructured feature superposition~\cite{ELHAGE_2022_SUPERPOSITION}.
+Without an algebraic operator that separates \emph{roles} (relations, attributes, slots) from \emph{fillers} (entities, values)~\cite{SMOLENSKY_1990_TPR}, co-occurring entities in a prompt or training corpus become statistically entangled---producing characteristic failure modes such as attribute swapping (assigning Entity A's property to Entity B), entity conflation, and fluent but factually ungrounded confabulation.
+
+Holographic neuro-symbolic representations address this binding problem structurally by encoding relational knowledge through explicit recursive role--filler binding~\cite{PLATE_1995_HRR,NICKEL_2016_HOLE,HERSCHE_2023_NVSA}.
+Specifically, an entity record $e_a$ possessing $M$ typed attributes $\{(\vect{r}_m, \vect{f}_{a,m})\}_{m=1}^M$ is composed as a bound superposition $\vect{s}_a = \sum_{m=1}^{M} \vect{r}_m \cconv \vect{f}_{a,m}$, and a multi-entity discourse state bundles distinct entities under entity-identifier keys $\vect{p}_a \in \mathbb{T}^D$:
+\begin{equation}\label{eq:neuro_symbolic_bundle}
+    \vect{m}_{\mathrm{ctx}} = \sum_{a=1}^{A} \vect{p}_a \cconv \left(\sum_{m=1}^{M} \vect{r}_m \cconv \vect{f}_{a,m}\right).
+\end{equation}
+Because circular convolution distributes over bundling and maps distinct role--filler pairs into mutually quasi-orthogonal subspaces ($\inner{\vect{p}_a \cconv \vect{r}_m \cconv \vect{f}_{a,m}}{\vect{p}_b \cconv \vect{r}_{m'} \cconv \vect{f}_{b,m'}} \approx 0$ whenever $(a,m) \neq (b,m')$), querying attribute $m$ of entity $a$ via composite unbinding $(\vect{p}_a \cconv \vect{r}_m) \ccorr \vect{m}_{\mathrm{ctx}}$ algebraically isolates $\vect{f}_{a,m}$ rather than interpolating across statistically correlated attributes of entity $b$.
+When multiple compositional factors are simultaneously unknown---as in analogical mapping, visual--symbolic reasoning, or multi-hop relational inference---resonator networks~\cite{FRADY_2020_RESONATOR,KENT_2020_RESONATOR} iteratively factorize the composite holographic vector across codebooks in parallel, avoiding the combinatorial search explosion of classical symbolic engines while preserving strict compositional integrity.
+
+\paragraph{Intrinsic Epistemic Uncertainty via Crosstalk and $\SNR$ Diagnostics.}
+Beyond preventing attribute entanglement, holographic unbinding offers a mathematically transparent mechanism for \emph{epistemic uncertainty quantification}.
+Standard autoregressive decoders map unnormalized logits through a softmax layer that forces probability mass to sum to unity even when a query falls entirely outside the model's stored knowledge, fostering overconfident hallucinations.
+In contrast, the raw complex readout $\tilde{\vect{v}}_q = \vect{q} \ccorr \vect{m}$ exhibits starkly distinct geometric statistics for in-memory versus out-of-memory queries.
+Let $\mathcal{C} = \{\vect{c}_1, \dots, \vect{c}_V\} \subset \C^D$ denote a normalized clean-up codebook of candidate symbols or concept prototypes.
+When $\vect{q}$ matches a stored key $\vect{k}_{j^*}$ bound to $\vect{c}_{u^*}$, the matched inner product concentrates around the coherent signal amplitude $A$, whereas all non-matching prototypes register zero-mean crosstalk with variance proportional to $N/D$.
+Conversely, when $\vect{q}$ is unstored (out-of-memory) or suffers severe capacity collision, $\tilde{\vect{v}}_q$ collapses entirely into isotropic crosstalk noise $\vect{\eta}_q$, producing flat similarity scores across $\mathcal{C}$ and dispersed phase angles.
+
+This dichotomy can be operationalized via a dimensionless \emph{retrieval coherence diagnostic} (an empirical peak-to-sidelobe $\SNR$ estimator):
+\begin{equation}\label{eq:coherence_metric}
+    \rho_{\mathrm{coh}}(\tilde{\vect{v}}_q)
+    = \frac{\max_{u \in \{1,\dots,V\}} \abs{\inner{\tilde{\vect{v}}_q}{\vect{c}_u}}}
+           {\sqrt{\frac{1}{V-1} \sum_{u \neq u^*} \abs{\inner{\tilde{\vect{v}}_q}{\vect{c}_u}}^2}},
+    \qquad u^* = \arg\max_{u} \abs{\inner{\tilde{\vect{v}}_q}{\vect{c}_u}}.
+\end{equation}
+For fixed $(D, N, V)$, the null distribution of $\rho_{\mathrm{coh}}$ under pure crosstalk noise admits analytical characterization via extreme-value statistics of complex Gaussian projections~\cite{FRADY_CAPACITY_VSA}.
+Consequently, whenever $\rho_{\mathrm{coh}}(\tilde{\vect{v}}_q)$ falls below a calibrated decision threshold $\tau_{\mathrm{abs}}$, the model possesses an intrinsic, zero-extra-forward-pass signal indicating an unstored query or retrieval collision---enabling principled abstention, verification-seeking tool calls, or multi-step resonator refinement instead of ungrounded generation.
+
+\paragraph{External Verifiable Holographic Indices.}
+A highly practical pathway toward hallucination-reduced AI decouples parametric linguistic fluency from mutable factual storage by pairing frozen foundation models with \emph{external, auditable holographic memory indices}.
+Unlike parametric model editing---which frequently induces unintended ripple effects across unrelated facts---or dense vector databases that require periodic graph re-indexing, an external holographic index inherits the linearity and commutativity of bundling.
+Inserting a newly verified fact triple $(\vect{k}_{\mathrm{new}}, \vect{v}_{\mathrm{new}})$ or retracting a deprecated or erroneous record requires a single $\bigo{D}$ additive operation:
+\begin{equation}\label{eq:holo_edit}
+    \vect{m}' = \vect{m} + \vect{k}_{\mathrm{new}} \cconv \vect{v}_{\mathrm{new}} - \vect{k}_{\mathrm{old}} \cconv \vect{v}_{\mathrm{old}},
+\end{equation}
+without gradient retraining or index reconstruction.
+Moreover, provenance and temporal validity metadata can be co-bound into each record via dedicated role keys (e.g., $\vect{r}_{\mathrm{src}} \cconv \vect{f}_{\mathrm{doc}} + \vect{r}_{\mathrm{time}} \cconv \vect{f}_{\mathrm{date}}$), enabling every retrieved assertion to be cryptographically or symbolically audited back to its authoritative source.
+
+% ==============================================================================
+\subsection{Continual Learning via Orthogonal Phase Subspaces}\label{sec:potentials:continual}
+% ==============================================================================
+
+\paragraph{Context-Keyed Parameter Superposition.}
+Catastrophic forgetting arises in gradient-trained neural networks because updating shared synaptic weights for a novel task $\tau$ directly overwrites parameter configurations critical to previously learned tasks $1, \dots, \tau - 1$.
+Conventional mitigations---such as quadratic parameter-importance regularization (e.g., Elastic Weight Consolidation~\cite{KIRKPATRICK_2017_EWC}), episodic data replay, or dynamic architectural expansion---either restrict plasticity as task count grows, raise privacy and storage costs, or scale memory linearly with the number of tasks $T$.
+Holographic superposition reframes continual learning as \emph{parameter-space multiplexing}: building on Cheung et al.'s Parameter Superposition (PSP) framework~\cite{HOLOGRAPHIC_CONTINUAL_LEARNING}, which multiplexes multiple task models inside a single fixed-dimensional parameter tensor via context-specific diagonal binary or complex phase keys, we formulate continual adaptation in terms of unitary complex phase-key binding.
+Extending PSP to complex spectral-torus adapters makes the interplay between exact orthogonal subspace partitioning, quasi-orthogonal interference scaling, and phase-coherence task routing analytically explicit.
+
+Consider a complex-valued linear transformation (or a low-rank adaptation module augmenting a frozen foundation weight matrix) with task-specific weight matrices $\mat{W}_\tau \in \C^{d_{\mathrm{out}} \times d_{\mathrm{in}}}$ for tasks $\tau = 1, \dots, T$.
+Assigning each task a diagonal unitary phase-key operator $\mat{C}_\tau = \operatorname{diag}(\vect{c}_\tau)$ with $\vect{c}_\tau \in \mathbb{T}^{d_{\mathrm{in}}}$, all $T$ tasks are superposed into a single shared weight matrix of constant parameter budget $P = d_{\mathrm{out}} d_{\mathrm{in}}$:
+\begin{equation}\label{eq:continual_superposition}
+    \mat{W}_{\mathrm{sup}} = \sum_{\tau=1}^{T} \mat{W}_\tau \mat{C}_\tau.
+\end{equation}
+At inference time on task $\tau$, modulating the input activation $\vect{x} \in \C^{d_{\mathrm{in}}}$ by the conjugate key $\mat{C}_\tau\herm = \operatorname{diag}(\conj{\vect{c}}_\tau)$ recovers the target linear map plus an inter-task crosstalk residual:
+\begin{equation}\label{eq:continual_readout}
+    \hat{\vect{y}}_\tau
+    = \mat{W}_{\mathrm{sup}} \mat{C}_\tau\herm \vect{x}
+    = \mat{W}_\tau \vect{x}
+      + \underbrace{\sum_{\tau' \neq \tau} \mat{W}_{\tau'} \bigl(\mat{C}_{\tau'} \mat{C}_\tau\herm\bigr) \vect{x}}_{\vect{\xi}_\tau \text{ (inter-task crosstalk)}}.
+\end{equation}
+Critically, whereas coordinate-wise subtraction of two unprojected weight matrices would experience $\bigo{1}$ per-entry interference, the linear layer's fan-in summation coherently integrates the target signal $\mat{W}_\tau \vect{x}$ while incoherently averaging the phase-randomized cross-terms $\mat{W}_{\tau'}(\mat{C}_{\tau'}\mat{C}_\tau\herm)\vect{x}$.
+When the relative phases $\arg(c_{\tau',j}\conj{c}_{\tau,j})$ are independent and uniformly distributed on $[0, 2\pi)$ across input coordinates $j \in \{1,\dots,d_{\mathrm{in}}\}$ and tasks have comparable weight energy $\sigma_w^2$, the per-output interference variance scales as $\E[\abs{\xi_{\tau,i}}^2] \propto (T - 1)\, d_{\mathrm{in}}\, \sigma_w^2 \sigma_x^2$.
+Under a \emph{weight--activation alignment} assumption---namely, that gradient training aligns active rows $\vect{w}_{\tau,i}$ of $\mat{W}_\tau$ with task-$\tau$ feature activations $\vect{x}$ such that $\abs{(\mat{W}_\tau \vect{x})_i}^2 = \kappa_\tau \norm{\vect{w}_{\tau,i}}_2^2 \norm{\vect{x}}_2^2 \asymp \kappa_\tau\, d_{\mathrm{in}}^2\, \sigma_w^2 \sigma_x^2$ with alignment factor $\kappa_\tau = \Omega(1)$ across the active fan-in (whereas unaligned random features satisfy $\kappa_\tau = \bigo{d_{\mathrm{in}}^{-1}}$ and gain no width advantage)---the coherently aligned task response scales quadratically in $d_{\mathrm{in}}$.
+Consequently, in this aligned feature-learning regime, the effective task signal-to-interference ratio satisfies $\SNR_{\mathrm{task}} \propto \kappa_\tau d_{\mathrm{in}} / (T - 1)$, mirroring the fundamental holographic scaling law and guaranteeing that wider layers absorb proportionally more tasks without catastrophic collapse.
+
+\paragraph{Orthogonal Phase Subspaces, Capacity Budgeting, and Task-Free Routing.}
+The scaling of \eqref{eq:continual_readout} naturally partitions holographic continual learning into two distinct capacity regimes governed by the ambient dimensionality $D$ and the effective subspace dimension $S$ required per task:
+\begin{enumerate}
+    \item \textbf{Exact Interference-Free Regime ($T \le \lfloor D/S \rfloor$):}
+    By restricting task representations or Fourier-domain adapters to mutually orthogonal complex phase subspaces---for example, partitioning spectral bins or enforcing unitary block projections $\mat{P}_\tau \mat{P}_{\tau'}\herm = \mat{0}$ for $\tau \neq \tau'$---inter-task crosstalk vanishes identically ($\vect{\xi}_\tau = \vect{0}$).
+    New tasks incur zero forgetting of prior tasks while still sharing a unified forward computation graph.
+    \item \textbf{Graceful Quasi-Orthogonal Superposition Regime ($T > \lfloor D/S \rfloor$):}
+    Once exact orthogonal capacity is exhausted, additional tasks are accommodated by relaxing strict orthogonality to quasi-orthogonal tight frames or random unit-phasor keys $\vect{c}_\tau \in \mathbb{T}^D$ approaching the Welch coherence bound.
+    Rather than suffering sudden catastrophic forgetting, accuracy across the task ensemble degrades smoothly and predictably as a function of the task-to-dimension ratio $T S / D$, enabling explicit capacity budgeting before deployment.
+\end{enumerate}
+
+Two open algorithmic opportunities further strengthen this paradigm for autonomous lifelong learners.
+First, in \emph{task-free} continual learning where the task identifier $\tau$ is unavailable at test time, the context key $\vect{c}_\tau$ can itself be inferred dynamically by querying a lightweight holographic task-index memory or by selecting the candidate key $\vect{c}_\tau$ that maximizes output phase coherence or minimizes prediction entropy across candidate routings~\cite{HOLOGRAPHIC_CONTINUAL_LEARNING}.
+Second, periodic \emph{phase-orthogonal consolidation}---akin to sleep-phase memory consolidation---can detect redundant or correlated task subspaces, distill shared skills into an unkeyed base weight $\mat{W}_0$, and re-orthogonalize residual task keys to reclaim holographic headroom across indefinite non-stationary streams.
+
+% ==============================================================================
+\subsection{Open Scaling Bottlenecks and Research Frontier}\label{sec:potentials:challenges}
+% ==============================================================================
+
+Realizing the architectural visions outlined in Sections~\ref{sec:potentials:kvcache}--\ref{sec:potentials:continual} at frontier scale requires confronting three deep technical bottlenecks spanning information theory, optimization and systems engineering, and empirical methodology.
+
+\paragraph{The Crosstalk Ceiling ($\SNR \propto D/N$) and Memory--Fidelity Trade-Offs.}
+No linear superposition scheme can circumvent Shannon's information-theoretic capacity limits.
+A complex vector $\vect{m} \in \C^D$ quantized to $b$ bits per real component carries at most $2 D b$ bits of entropy; consequently, attempting lossless verbatim recall of $N$ arbitrary high-entropy items from a single dense holographic trace inevitably encounters the crosstalk ceiling $\SNR \propto D / N$~\cite{PLATE_1995_HRR,FRADY_CAPACITY_VSA}.
+For modern language models where $N$ may exceed $10^6$ tokens while layer dimensions remain $D \sim 10^3\text{--}10^4$, naive single-trace dense superposition operates deep in the sub-unit $\SNR$ regime.
+Overcoming this ceiling requires moving beyond monolithic dense bundling along three research axes:
+(i) \emph{semantic--verbatim decoupling}, using holographic traces strictly for lossy semantic gist, entity--relation state, and coarse episodic pointers while delegating exact string copying to local windows or sparse exact caches;
+(ii) \emph{sparse and block-structured holographic codes}~\cite{SCHLEGEL_VSA_COMPARISON,KLEYKO_VSA_SURVEY}, wherein binding operates over block-sparse segmented phasors that restrict crosstalk to active blocks and dramatically improve bits-per-dimension efficiency; and
+(iii) \emph{adaptive nonlinear clean-up memories}, coupling holographic readouts with dense associative memories (modern Hopfield networks~\cite{RAMSAUER_MODERN_HOPFIELD}) or iterative resonator networks~\cite{FRADY_2020_RESONATOR} that trade bounded iterative compute for near-exponential codebook separation.
+
+\paragraph{Optimization and Systems Barriers for Phase-Coupled Deep Networks.}
+Scaling complex-valued and phase-coupled holographic layers to multi-billion-parameter networks exposes severe optimization and hardware-systems friction~\cite{BASSEY_CVNN_SURVEY,TRABELSI_2018_DCN}.
+Although Wirtinger calculus provides exact gradients for real-valued loss functions of complex parameters, backpropagation through deep chains of circular convolutions, correlations, and periodic phase encodings $\exp(i\vect{\phi})$ suffers from phase-wrapping discontinuities ($\phi \equiv \phi + 2\pi$) and highly oscillatory, non-convex loss surfaces with abundant local minima.
+Preserving unit-modulus phasor norms ($\vect{k} \in \mathbb{T}^D$) without killing gradient flow demands specialized manifold optimizers, complex-aware normalization layers, and phase-preserving nonlinearities (such as $\mathrm{modReLU}$ or gated spectral filtering) whose stability at 100-layer depths remains far less understood than real-valued pre-norm Transformer recipes.
+
+Compounding these optimization hurdles is an acute \emph{hardware lottery} penalty~\cite{HOOKER_2021_HARDWARE_LOTTERY}.
+Contemporary AI accelerators---notably GPU Tensor Cores and systolic TPUs---are heavily specialized for low-precision real-valued general matrix multiplication (GEMM in \texttt{BF16}, \texttt{FP16}, and \texttt{FP8}).
+By contrast, batched small-to-medium FFTs for circular convolution, fused complex Hadamard recurrences, and low-precision quantized phase arithmetic exhibit poor arithmetic intensity and limited kernel fusion on commodity GPUs, often erasing the asymptotic FLOP advantages of $\bigo{D \log D}$ binding in wall-clock latency.
+Closing this systems gap will require both hardware-aware digital kernels (e.g., fused Triton/CUDA complex-recurrence and spectral-convolution kernels analogous to FlashAttention and Mamba scan primitives) and tight algorithm--hardware co-design with native coherent photonic and diffractive optical accelerators~\cite{WETZSTEIN_2020_OPTICAL_AI,MCMAHON_2023_PHYSICS_OPTICAL_NN}, where complex phase modulation and interference execute natively at the speed of light.
+
+\paragraph{Need for Standardized Cross-Paradigm Benchmarks.}
+Finally, empirical progress in holographic neural networks and VSAs has historically been impeded by fragmented evaluation practices.
+Many studies validate capacity or reasoning claims on small-scale synthetic tasks (e.g., few-hundred-item key--value dictionaries, low-dimensional classification, or bespoke cognitive puzzles) without direct, compute-matched comparisons against modern Transformers, SSMs, and Hopfield baselines.
+To establish scientific consensus on where holographic superposition genuinely outperforms competing paradigms, the community needs a unified, open benchmark suite spanning four standardized evaluation pillars:
+\begin{enumerate}
+    \item \textbf{Long-Horizon Associative Recall and Selective Copying:} Scaling context length $N$ from $10^3$ to $10^6$ under fixed memory budgets, disentangling exact verbatim copying from multi-hop semantic aggregation by combining synthetic recall diagnostics (Zoology~\cite{ARORA_2023_ZOOLOGY,JELASSI_2024_REPEAT_AFTER_ME}) with standardized long-context stress tests such as RULER~\cite{HSIEH_2024_RULER} (multi-key/multi-value retrieval, variable tracking, and aggregation) and BABILong~\cite{KURATOV_2024_BABILONG} (multi-hop reasoning over facts buried in million-token distractors). Directly reporting holographic, delta-rule, and hybrid models on these suites exposes the exact crosstalk--capacity frontier beyond short synthetic dictionaries.
+    \item \textbf{Compositional Systematicity and Hallucination Calibration:} Evaluating out-of-distribution role--filler recombination, multi-entity attribute binding under distractor density, and abstention calibration (e.g., AUROC and selective risk via $\rho_{\mathrm{coh}}$) on unstored or contradictory queries.
+    \item \textbf{Continual Task-Stream Retention:} Measuring average accuracy, backward transfer, and graceful interference curves as a function of the task-to-parameter load ratio $T/P$ under strict parameter and replay constraints.
+    \item \textbf{Hardware-Normalized Efficiency and Physical Noise Resilience:} Reporting wall-clock throughput, memory-bandwidth utilization, energy per token ($\mathrm{J/tok}$), and accuracy degradation under realistic low-bit phase quantization, thermal phase drift, and photonic shot-noise perturbations~\cite{WETZSTEIN_2020_OPTICAL_AI,MCMAHON_2023_PHYSICS_OPTICAL_NN}.
+\end{enumerate}
+Such unified benchmarks---paired with reproducible complex-valued kernel libraries---will convert holographic neural computation from a compelling theoretical paradigm into a rigorously validated pillar of next-generation AI systems.

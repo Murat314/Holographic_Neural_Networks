@@ -1,0 +1,213 @@
+% ==============================================================================
+% Figure 4: Future Hybrid Architecture — Local Exact Window + Holographic O(1)
+% Superposition Memory Module within a Transformer/SSM Backbone
+% ==============================================================================
+\begin{tikzpicture}[
+    font=\footnotesize,
+    >=Stealth,
+    node distance=0.95cm and 0.72cm,
+    % Base block styles
+    baseblock/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1,
+        fill=#1!8,
+        thick,
+        align=center,
+        inner sep=5pt,
+        minimum height=1.18cm,
+        text=black
+    },
+    io/.style={
+        baseblock=okabeSlate,
+        fill=okabeLightBg,
+        minimum width=5.6cm,
+        minimum height=0.82cm
+    },
+    localnode/.style={
+        baseblock=okabeNavy,
+        minimum width=2.75cm
+    },
+    holonode/.style={
+        baseblock=okabeTeal,
+        minimum width=2.75cm
+    },
+    memnode/.style={
+        baseblock=okabeCoral,
+        fill=okabeCoral!10,
+        minimum width=2.85cm
+    },
+    fusenode/.style={
+        baseblock=okabePurple,
+        fill=okabePurple!10,
+        minimum width=5.0cm,
+        minimum height=0.88cm
+    },
+    % Container styles
+    panel/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=#1!75,
+        fill=#1!4,
+        dashed,
+        thick,
+        inner sep=9pt
+    },
+    % Arrow styles
+    flow/.style={->, thick, draw=okabeSlate!90},
+    holoflow/.style={->, thick, draw=okabeTeal!90!black},
+    evictflow/.style={->, thick, densely dashed, draw=okabeCoral},
+    queryflow/.style={->, thick, draw=okabeAmber!85!black},
+    skipflow/.style={->, thick, densely dotted, draw=okabeSlate},
+    edgelabel/.style={font=\scriptsize, text=okabeSlate, inner sep=1.5pt}
+]
+
+% ------------------------------------------------------------------------------
+% Row 1: Local Exact Buffer & Holographic Write Pipeline
+% ------------------------------------------------------------------------------
+\node[localnode] (buf) {%
+    \textbf{Sliding-Window}\\[-1pt]
+    \textbf{KV-Buffer}\\[1pt]
+    {\scriptsize $[t{-}W{+}1,\,t]$, $\bigo{W}$}
+};
+
+\node[holonode, right=1.25cm of buf] (enc) {%
+    \textbf{Complex Phase}\\[-1pt]
+    \textbf{Encoder}\\[1pt]
+    {\scriptsize $\vect{k}_t,\vect{q}_t \in \mathbb{T}^D,\; \vect{v}_t \in \C^D$}
+};
+
+\node[holonode, right=0.72cm of enc] (bind) {%
+    \textbf{FFT / Hadamard}\\[-1pt]
+    \textbf{Binding}\\[1pt]
+    {\scriptsize $\hat{\vect{k}}_t \hadamard \hat{\vect{v}}_t \Leftrightarrow \vect{k}_t \cconv \vect{v}_t$}
+};
+
+\node[memnode, right=0.72cm of bind] (mem) {%
+    \textbf{Gated Trace $\mat{M}_t$}\\[-1pt]
+    {\scriptsize $\mat{M}_t \in \C^{K \times D}$, $\bigo{1}$}\\[1pt]
+    {\scriptsize $\gamma_t \mat{M}_{t-1} + \beta_t (\vect{k}_t \cconv \vect{v}_t)$}
+};
+
+% ------------------------------------------------------------------------------
+% Row 2: Local Exact Attention & Holographic Read / Clean-Up Pipeline
+% ------------------------------------------------------------------------------
+\node[localnode, below=1.18cm of buf] (attn) {%
+    \textbf{Local Exact}\\[-1pt]
+    \textbf{Attention}\\[1pt]
+    {\scriptsize Verbatim recall $\vect{y}_t^{\mathrm{loc}}$}
+};
+
+\node[holonode, below=1.18cm of bind] (cleanup) {%
+    \textbf{Clean-Up \&}\\[-1pt]
+    \textbf{$\SNR$ Projection}\\[1pt]
+    {\scriptsize Denoise $\tilde{\vect{v}}_t \to \vect{y}_t^{\mathrm{hol}}$}
+};
+
+\node[holonode, below=1.18cm of mem] (unbind) {%
+    \textbf{Correlation}\\[-1pt]
+    \textbf{Unbinding}\\[1pt]
+    {\scriptsize $\tilde{\vect{v}}_t = \vect{q}_t \ccorr \mat{M}_t$}
+};
+
+% ------------------------------------------------------------------------------
+% Top Input & Bottom Fusion / Residual Backbone Interface
+% ------------------------------------------------------------------------------
+\coordinate (midTop) at ($(buf.north)!0.5!(mem.north)$);
+\node[io, above=1.55cm of midTop] (input) {%
+    \textbf{Backbone Hidden State $\vect{h}_t \in \R^{d}$} \quad
+    {\scriptsize (Transformer / SSM Layer $\ell{-}1$)}
+};
+
+\coordinate (midBot) at ($(attn.south)!0.5!(cleanup.south)$);
+\node[fusenode, below=1.15cm of midBot] (fusion) {%
+    \textbf{Adaptive Gated Fusion}\\[1pt]
+    {\scriptsize $\vect{y}_t = \vect{g}_t \hadamard \vect{y}_t^{\mathrm{loc}} + (\vect{1}-\vect{g}_t) \hadamard \vect{y}_t^{\mathrm{hol}}$}
+};
+
+\node[io, below=0.72cm of fusion] (output) {%
+    \textbf{Residual Add \& Norm $\to \vect{h}_t^{(\ell)}$} \quad
+    {\scriptsize (Next Transformer / SSM Block)}
+};
+
+% ------------------------------------------------------------------------------
+% Background Shaded Pathway Panels
+% ------------------------------------------------------------------------------
+% Recurrent multi-timescale self-loop on Gated Trace M_t (coordinate included in fit)
+\coordinate (memloop) at ($(mem.east)+(1.48cm,0)$);
+\begin{scope}[on background layer]
+    \node[panel=okabeNavy, fit=(buf)(attn),
+          label={[font=\scriptsize\bfseries, text=okabeNavy, yshift=2pt]above:Local Exact Window ($\bigo{W}$)}]
+          (localpanel) {};
+
+    \node[panel=okabeTeal, fit=(enc)(bind)(mem)(cleanup)(unbind)(memloop),
+          inner sep=10pt,
+          label={[font=\scriptsize\bfseries, text=okabeTeal!85!black, yshift=2pt]above:Holographic $\bigo{1}$ Superposition Memory Module (Multi-Timescale $K \ll N$)}]
+          (holopanel) {};
+\end{scope}
+
+% ------------------------------------------------------------------------------
+% Signal Routing & Connections
+% ------------------------------------------------------------------------------
+% Input splits to Local Buffer and Holographic Encoder
+\coordinate (splitPt) at ($(input.south)+(0,-0.32cm)$);
+\draw[flow] (input.south) -- (splitPt) -| (buf.north);
+\draw[flow] (splitPt) -| (enc.north);
+
+% Local exact pathway
+\draw[flow, draw=okabeNavy] (buf.south) -- node[edgelabel, right=2pt] {$\mat{K}_{\mathrm{loc}}, \mat{V}_{\mathrm{loc}}$} (attn.north);
+
+% Eviction handoff from sliding window into holographic encoder
+\draw[evictflow] (buf.east) -- node[edgelabel, text=okabeCoral, above=2pt, align=center] {evict\\$t{-}W$} (enc.west);
+
+% Holographic write path: Encoder -> Binding -> Gated Trace
+\draw[holoflow] (enc.east) -- node[edgelabel, above=2pt] {$\vect{k},\vect{v}$} (bind.west);
+\draw[holoflow] (bind.east) -- node[edgelabel, above=2pt] {$\vect{k} \cconv \vect{v}$} (mem.west);
+
+% Recurrent multi-timescale self-loop on Gated Trace M_t
+\draw[holoflow, draw=okabeCoral]
+    ($(mem.east)+(0,0.22cm)$)
+    -- ++(0.36cm,0)
+    |- node[edgelabel, text=okabeCoral, pos=0.25, right=1pt] {$\gamma_t \mat{M}_{t-1}$}
+    ($(mem.east)+(0,-0.22cm)$);
+
+% Holographic read path: Gated Trace -> Correlation Unbinding -> Clean-Up
+\draw[holoflow] ($(mem.south)+(0.35cm,0)$) -- node[edgelabel, right=2pt] {$\mat{M}_t$} ($(unbind.north)+(0.35cm,0)$);
+
+% Query routing from Encoder through inter-row corridor to Unbinding (zero crossings)
+\coordinate (qCorridor) at ($(enc.south)+(0,-0.55cm)$);
+\coordinate (qEntry) at ($(unbind.north west)+(0.48cm,0)$);
+\draw[queryflow]
+    (enc.south)
+    -- (qCorridor)
+    -- node[edgelabel, text=okabeAmber!80!black, above=1.5pt, pos=0.45] {phase query $\vect{q}_t \in \mathbb{T}^D$}
+    (qCorridor -| qEntry)
+    -- (qEntry);
+
+% Unbinding -> Clean-Up
+\draw[holoflow] (unbind.west) -- node[edgelabel, above=2pt] {$\vect{v}_{j^*} {+} \vect{\eta}_t$} (cleanup.east);
+
+% Clean-Up & Local Attention -> Adaptive Fusion Gate
+\draw[flow, draw=okabeNavy]
+    (attn.south) |- node[edgelabel, text=okabeNavy, pos=0.72, above=1.5pt] {$\vect{y}_t^{\mathrm{loc}}$}
+    (fusion.west);
+
+\draw[holoflow]
+    (cleanup.south) |- node[edgelabel, text=okabeTeal!85!black, pos=0.72, above=1.5pt] {$\vect{y}_t^{\mathrm{hol}}$}
+    (fusion.east);
+
+% Fusion -> Residual Add & Norm
+\draw[flow] (fusion.south) -- node[edgelabel, right=2pt] {$\vect{y}_t$} (output.north);
+
+% Outer left residual skip connection from Backbone Input to Add & Norm
+\coordinate (skipRail) at ($(localpanel.west)+(-0.62cm,0)$);
+\coordinate (skipTop) at (input.west -| skipRail);
+\coordinate (skipBot) at (output.west -| skipRail);
+\draw[skipflow]
+    (input.west)
+    -- (skipTop)
+    -- node[edgelabel, midway, rotate=90, above=2pt] {residual skip $\vect{h}_t$}
+    (skipBot)
+    -- (output.west);
+
+\end{tikzpicture}

@@ -1,0 +1,387 @@
+\section{Mathematical Foundations of Holographic Representations}\label{sec:math}
+
+Holographic Neural Networks (HNNs) and Vector Symbolic Architectures (VSAs) share a common mathematical core: the encoding of structured, compositional data into high-dimensional distributed vectors via invertible (or approximately invertible) algebraic binding and additive superposition~\cite{SUTHERLAND_1990_HNN,PLATE_1995_HRR,KANERVA_2009_HDC}.
+In this section, we construct a unified, self-contained mathematical framework over complex vector spaces $\C^D$ that encompasses classical Sutherland-style HNNs, Fourier Holographic Reduced Representations (FHRR), and real-valued Holographic Reduced Representations (HRR) as special cases~\cite{SCHLEGEL_VSA_COMPARISON,KLEYKO_VSA_SURVEY}.
+We establish exact algebraic identities linking time-domain circular convolution to frequency-domain phase modulation, characterize crosstalk interference analytically, and prove the fundamental Signal-to-Noise Ratio ($\SNR$) and retrieval capacity bounds governing holographic memory.
+
+% ------------------------------------------------------------------------------
+\subsection{Complex Vector Spaces and Phasor Encodings}\label{sec:math:phasors}
+% ------------------------------------------------------------------------------
+
+Let $\C^D$ denote the $D$-dimensional complex Hilbert space equipped with the standard Hermitian inner product
+\begin{equation}\label{eq:hermitian_inner}
+    \inner{\vect{u}}{\vect{v}} = \vect{u}\herm \vect{v} = \sum_{k=0}^{D-1} \conj{u}_k \, v_k,
+\end{equation}
+which induces the Euclidean norm $\norm{\vect{u}}_2 = \sqrt{\inner{\vect{u}}{\vect{u}}}$.
+In polar (phasor) coordinates, any state vector $\vect{x} \in \C^D$ admits the componentwise representation
+\begin{equation}\label{eq:phasor_form}
+    x_k = \lambda_k e^{i \theta_k}, \qquad \lambda_k \in \R_{\ge 0}, \quad \theta_k \in [-\pi, \pi), \quad k \in \{0, \dots, D-1\}.
+\end{equation}
+This representation decouples two semantically distinct quantities~\cite{SUTHERLAND_1990_HNN}: the \emph{phase angle} $\theta_k$ encodes continuous or symbolic feature values mapped onto the unit circle $S^1$, whereas the \emph{magnitude} $\lambda_k$ encodes confidence, salience, or statistical weight.
+Setting $\lambda_k = 0$ corresponds to an absent or uninformative stimulus without perturbing the phase of superposed associations, a property exploited directly in classical HNN stimulus--response enfolding.
+
+A particularly well-behaved subset of $\C^D$ is the \emph{unitary complex torus} (phase-only manifold),
+\begin{equation}\label{eq:complex_torus}
+    \mathbb{T}^D \coloneqq \left\{ \vect{z} \in \C^D : \abs{z_k} = 1 \;\; \forall\, k \in \{0, \dots, D-1\} \right\}.
+\end{equation}
+On $\mathbb{T}^D$, every vector satisfies $\norm{\vect{z}}_2 = \sqrt{D}$, and the natural normalized similarity between two phasor vectors $\vect{u}, \vect{v} \in \mathbb{T}^D$ is the real-part cosine overlap
+\begin{equation}\label{eq:phasor_similarity}
+    s(\vect{u}, \vect{v}) \coloneqq \frac{1}{D}\Real\inner{\vect{u}}{\vect{v}}
+    = \frac{1}{D} \sum_{k=0}^{D-1} \cos\!\left(\theta_k^{(v)} - \theta_k^{(u)}\right) \in [-1, 1],
+\end{equation}
+achieving $s(\vect{u}, \vect{u}) = 1$.
+Crucially, $(\mathbb{T}^D, \hadamard)$ forms an Abelian group under the elementwise Hadamard product, with identity element $\vect{1} = (1, \dots, 1)\trans$ and exact elementwise inverse given by complex conjugation $\conj{\vect{z}}$ (since $z_k \conj{z}_k = \abs{z_k}^2 = 1$).
+
+The geometric foundation of all holographic and hyperdimensional memories is \emph{quasi-orthogonality} (the concentration of measure in high dimensions).
+
+\begin{proposition}[Quasi-Orthogonality on $\mathbb{T}^D$]\label{prop:quasi_ortho}
+Let $\vect{u}, \vect{v} \in \mathbb{T}^D$ be independent random phasor vectors whose phase angles are drawn i.i.d.\ uniformly from $[-\pi, \pi)$.
+Then their normalized similarity $s(\vect{u}, \vect{v})$ satisfies
+\begin{equation}\label{eq:quasi_ortho_moments}
+    \E\!\left[s(\vect{u}, \vect{v})\right] = 0, \qquad
+    \Var\!\left(s(\vect{u}, \vect{v})\right) = \frac{1}{2D},
+\end{equation}
+and for every tolerance $\epsilon > 0$,
+\begin{equation}\label{eq:hoeffding_ortho}
+    \Pr\!\left(\abs{s(\vect{u}, \vect{v})} \ge \epsilon\right) \le 2 \exp\!\left(-\frac{D \epsilon^2}{2}\right).
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Let $\Delta_k \coloneqq \left(\theta_k^{(v)} - \theta_k^{(u)}\right) \bmod 2\pi$ reduced to $[-\pi, \pi)$.
+Because $\theta_k^{(u)}$ and $\theta_k^{(v)}$ are independent and uniform on $[-\pi, \pi)$, the differences $\{\Delta_k\}_{k=0}^{D-1}$ are i.i.d.\ uniform on $[-\pi, \pi)$.
+Consequently, $\E[\cos\Delta_k] = 0$ and $\Var(\cos\Delta_k) = \E[\cos^2\Delta_k] = \frac{1}{2}\E[1 + \cos(2\Delta_k)] = \frac{1}{2}$.
+By independence across coordinates, $\E[s(\vect{u}, \vect{v})] = 0$ and
+\begin{equation*}
+    \Var\!\left(s(\vect{u}, \vect{v})\right)
+    = \frac{1}{D^2} \sum_{k=0}^{D-1} \Var(\cos\Delta_k)
+    = \frac{1}{2D}.
+\end{equation*}
+Since each summand $Y_k = \cos\Delta_k$ is bounded in $[-1, 1]$ (range width $2$) with zero mean, Hoeffding's inequality yields
+\begin{equation*}
+    \Pr\!\left(\abs{\frac{1}{D}\sum_{k=0}^{D-1} Y_k} \ge \epsilon\right)
+    \le 2 \exp\!\left(-\frac{2 D^2 \epsilon^2}{\sum_{k=0}^{D-1} (1 - (-1))^2}\right)
+    = 2 \exp\!\left(-\frac{D\epsilon^2}{2}\right). \qedhere
+\end{equation*}
+\end{proof}
+
+By a union bound over all $\binom{M}{2}$ pairs, Proposition~\ref{prop:quasi_ortho} guarantees that $\mathbb{T}^D$ accommodates $M = \exp(\Omega(D\epsilon^2))$ pairwise $\epsilon$-quasi-orthogonal atomic symbols---exponentially many more than the $D$ strictly orthogonal basis vectors permitted in $\C^D$.
+
+\begin{remark}[Algebraic Specializations of the Complex Phasor Framework]\label{rem:specializations}
+Prominent VSA families arise as direct restrictions of~\eqref{eq:phasor_form}--\eqref{eq:complex_torus}~\cite{SCHLEGEL_VSA_COMPARISON}:
+(i)~\emph{Fourier HRR (FHRR)} operates directly on $\mathbb{T}^D$ with continuous phases $\theta_k \in [-\pi, \pi)$;
+(ii)~\emph{Multiply--Add--Permute (MAP)} restricts phases to the discrete subgroup $\{0, \pi\}$, yielding bipolar vectors $\{-1, +1\}^D$;
+(iii)~\emph{Binary Spatter Codes (BSC)} map $\{0, \pi\} \mapsto \{0, 1\}^D$ under XOR; and
+(iv)~\emph{Real HRR}~\cite{PLATE_1995_HRR} operates in the time domain $\R^D$ with conjugate-symmetric spectra $X_{D-\omega} = \conj{X}_\omega$ (either with unitary spectral magnitudes $\abs{X_\omega}=1$ or i.i.d.\ Gaussian entries $x_k \sim \mathcal{N}(0, 1/D)$).
+\end{remark}
+
+% ------------------------------------------------------------------------------
+\subsection{Algebraic Primitives: Binding, Bundling, and Unbinding}\label{sec:math:primitives}
+% ------------------------------------------------------------------------------
+
+To build structured representations---such as key--value dictionaries, role--filler propositions, or sequential episodes---a holographic architecture requires three algebraic primitives: \emph{binding} to associate paired items, \emph{bundling} to superpose multiple associations into a fixed-width trace, and \emph{unbinding} to query the trace.
+
+\subsubsection{Binding via Circular Convolution and the Discrete Fourier Transform}
+
+\begin{definition}[Circular Convolution and DFT Convention]\label{def:cconv_dft}
+For vectors $\vect{a}, \vect{b} \in \C^D$, their \emph{circular convolution} $\vect{a} \cconv \vect{b} \in \C^D$ is defined componentwise by
+\begin{equation}\label{eq:cconv_def}
+    (\vect{a} \cconv \vect{b})_j = \sum_{k=0}^{D-1} a_k \, b_{(j - k) \bmod D}, \qquad j \in \{0, \dots, D-1\}.
+\end{equation}
+We adopt the unnormalized Discrete Fourier Transform (DFT) $\vect{A} = \DFT(\vect{a})$ and its inverse $\vect{a} = \IDFT(\vect{A})$:
+\begin{equation}\label{eq:dft_def}
+    A_\omega = \big[\DFT(\vect{a})\big]_\omega = \sum_{k=0}^{D-1} a_k \, e^{-i \frac{2\pi}{D}\omega k}, \qquad
+    a_k = \big[\IDFT(\vect{A})\big]_k = \frac{1}{D} \sum_{\omega=0}^{D-1} A_\omega \, e^{i \frac{2\pi}{D}\omega k}.
+\end{equation}
+\end{definition}
+
+Under this convention, Parseval's identity takes the form $\inner{\vect{u}}{\vect{v}} = \frac{1}{D}\inner{\DFT(\vect{u})}{\DFT(\vect{v})}$.
+In particular, any time-domain vector $\vect{a} \in \C^D$ whose spectrum lies on the complex torus ($\DFT(\vect{a}) \in \mathbb{T}^D$) automatically possesses unit Euclidean norm: $\norm{\vect{a}}_2^2 = \frac{1}{D}\sum_{\omega=0}^{D-1}\abs{A_\omega}^2 = 1$.
+
+\begin{proposition}[Circular Convolution Theorem]\label{prop:conv_thm}
+For all $\vect{a}, \vect{b} \in \C^D$,
+\begin{equation}\label{eq:cconv_fft}
+    \DFT(\vect{a} \cconv \vect{b}) = \DFT(\vect{a}) \hadamard \DFT(\vect{b}),
+    \qquad\text{equivalently}\qquad
+    \vect{a} \cconv \vect{b} = \IDFT\!\left(\DFT(\vect{a}) \hadamard \DFT(\vect{b})\right).
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Expanding the $\omega$-th Fourier coefficient of $\vect{a} \cconv \vect{b}$ via~\eqref{eq:cconv_def} and~\eqref{eq:dft_def} gives
+\begin{align}
+    \big[\DFT(\vect{a} \cconv \vect{b})\big]_\omega
+    &= \sum_{j=0}^{D-1} \left( \sum_{k=0}^{D-1} a_k \, b_{(j - k) \bmod D} \right) e^{-i \frac{2\pi}{D}\omega j} \nonumber \\
+    &= \sum_{k=0}^{D-1} a_k \, e^{-i \frac{2\pi}{D}\omega k}
+       \sum_{j=0}^{D-1} b_{(j - k) \bmod D} \, e^{-i \frac{2\pi}{D}\omega (j - k)} \nonumber \\
+    &= \left(\sum_{k=0}^{D-1} a_k \, e^{-i \frac{2\pi}{D}\omega k}\right)
+       \left(\sum_{\ell=0}^{D-1} b_\ell \, e^{-i \frac{2\pi}{D}\omega \ell}\right)
+     = A_\omega B_\omega, \label{eq:conv_proof}
+\end{align}
+where the third equality uses the $D$-periodicity of $e^{-i \frac{2\pi}{D}\omega m}$ under the index substitution $\ell = (j - k) \bmod D$.
+\end{proof}
+
+Proposition~\ref{prop:conv_thm} carries two profound architectural consequences.
+First, it reduces the asymptotic complexity of time-domain binding from $\bigo{D^2}$ direct summation to $\bigo{D \log D}$ via the Fast Fourier Transform (FFT).
+Second, when representations are maintained natively in the complex phasor domain ($\vect{A}, \vect{B} \in \mathbb{T}^D$), binding collapses to $\bigo{D}$ elementwise phase addition,
+\begin{equation}\label{eq:phase_binding}
+    (\vect{A} \hadamard \vect{B})_\omega = \lambda_\omega^{(A)} \lambda_\omega^{(B)} e^{i(\theta_\omega^{(A)} + \theta_\omega^{(B)})},
+\end{equation}
+preserving norm ($\norm{\vect{a} \cconv \vect{b}}_2 = 1$ for unitary spectra) while mapping pairs into a region of $\C^D$ quasi-orthogonal to both operands: $\E[s(\vect{A} \hadamard \vect{B}, \vect{A})] = \E[s(\vect{B}, \vect{1})] = 0$.
+Furthermore, circular convolution is commutative, associative, and bilinear (distributing over vector addition).
+
+\subsubsection{Bundling (Additive Superposition)}
+
+Given $N$ bound key--value pairs $\{(\vect{k}_n, \vect{v}_n)\}_{n=1}^N$, \emph{bundling} enfolds all associations into a single fixed-dimensional composite memory trace via weighted superposition:
+\begin{equation}\label{eq:bundling}
+    \vect{m} = \sum_{n=1}^{N} \alpha_n (\vect{k}_n \cconv \vect{v}_n) \in \C^D
+    \;\Longleftrightarrow\;
+    \vect{M} = \DFT(\vect{m}) = \sum_{n=1}^{N} \alpha_n (\vect{K}_n \hadamard \vect{V}_n) \in \C^D,
+\end{equation}
+where $\alpha_n > 0$ are optional salience or exponential-decay weights (typically $\alpha_n = 1$ for uniform memory).
+Unlike a list or Transformer key--value cache whose storage scales as $\bigo{ND}$, the holographic trace $\vect{m}$ occupies strictly $\bigo{D}$ memory---that is, $\bigo{1}$ with respect to the number of stored items $N$.
+Because addition is commutative and preserves inner-product overlap with each constituent term, $\vect{m}$ functions simultaneously as a distributed set representation and a key-addressable associative store.
+In hardware-constrained phase-only implementations, $\vect{M}$ may optionally be projected back onto $\mathbb{T}^D$ via elementwise normalization $\Pi_{\mathbb{T}}(\vect{M})_\omega = M_\omega / \abs{M_\omega}$, which maintains constant dynamic range at the cost of a modest $\pi/4$ multiplicative reduction in asymptotic $\SNR$~\cite{PLATE_1995_HRR,FRADY_CAPACITY_VSA}.
+
+\subsubsection{Unbinding via Circular Correlation and Spectral Adjoints}
+
+To retrieve the value associated with a query key $\vect{k}_q$, we apply \emph{circular correlation} ($\ccorr$), which serves as the exact Hilbert-space adjoint of circular convolution.
+
+\begin{definition}[Circular Correlation and Conjugate Involution]\label{def:ccorr}
+For $\vect{a}, \vect{b} \in \C^D$, their \emph{circular correlation} $\vect{a} \ccorr \vect{b} \in \C^D$ is
+\begin{equation}\label{eq:ccorr_def}
+    (\vect{a} \ccorr \vect{b})_j = \sum_{k=0}^{D-1} \conj{a}_k \, b_{(j + k) \bmod D}, \qquad j \in \{0, \dots, D-1\}.
+\end{equation}
+The \emph{conjugate involution} $\inv{\vect{a}} \in \C^D$ of $\vect{a}$ is defined by $(\inv{\vect{a}})_k \coloneqq \conj{a}_{(-k) \bmod D}$.
+\end{definition}
+
+\begin{lemma}[Adjoint and Spectral Characterization of Unbinding]\label{lem:ccorr_props}
+For all $\vect{a}, \vect{b}, \vect{u} \in \C^D$, the circular correlation satisfies:
+\begin{enumerate}
+    \item \emph{Involution identity:} $\vect{a} \ccorr \vect{b} = \inv{\vect{a}} \cconv \vect{b}$;
+    \item \emph{Spectral conjugation:} $\DFT(\inv{\vect{a}}) = \conj{\DFT(\vect{a})}$, and hence
+    \begin{equation}\label{eq:ccorr_fft}
+        \DFT(\vect{a} \ccorr \vect{b}) = \conj{\DFT(\vect{a})} \hadamard \DFT(\vect{b});
+    \end{equation}
+    \item \emph{Hilbert-space adjointness:}
+    \begin{equation}\label{eq:adjoint_identity}
+        \inner{\vect{u}}{\vect{a} \ccorr \vect{b}} = \inner{\vect{a} \cconv \vect{u}}{\vect{b}}.
+    \end{equation}
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+For (1), substituting $k = (-m) \bmod D$ (so $j - m \equiv j + k \pmod D$) into~\eqref{eq:cconv_def} yields
+\begin{equation*}
+    (\inv{\vect{a}} \cconv \vect{b})_j
+    = \sum_{m=0}^{D-1} \conj{a}_{(-m) \bmod D} \, b_{(j - m) \bmod D}
+    = \sum_{k=0}^{D-1} \conj{a}_k \, b_{(j + k) \bmod D}
+    = (\vect{a} \ccorr \vect{b})_j.
+\end{equation*}
+For (2), applying the same substitution to~\eqref{eq:dft_def} gives
+\begin{equation*}
+    \big[\DFT(\inv{\vect{a}})\big]_\omega
+    = \sum_{m=0}^{D-1} \conj{a}_{(-m) \bmod D} \, e^{-i \frac{2\pi}{D}\omega m}
+    = \sum_{k=0}^{D-1} \conj{a}_k \, e^{i \frac{2\pi}{D}\omega k}
+    = \conj{\sum_{k=0}^{D-1} a_k \, e^{-i \frac{2\pi}{D}\omega k}}
+    = \conj{A}_\omega,
+\end{equation*}
+and~\eqref{eq:ccorr_fft} follows immediately from Proposition~\ref{prop:conv_thm}.
+For (3), applying Parseval's identity together with~\eqref{eq:cconv_fft} and~\eqref{eq:ccorr_fft},
+\begin{equation*}
+    \inner{\vect{u}}{\vect{a} \ccorr \vect{b}}
+    = \frac{1}{D} \sum_{\omega=0}^{D-1} \conj{U}_\omega \left(\conj{A}_\omega B_\omega\right)
+    = \frac{1}{D} \sum_{\omega=0}^{D-1} \conj{\left(A_\omega U_\omega\right)} B_\omega
+    = \inner{\vect{a} \cconv \vect{u}}{\vect{b}}. \qedhere
+\end{equation*}
+\end{proof}
+
+Applying query unbinding with key $\vect{k}_q$ ($q \in \{1, \dots, N\}$) to the uniform bundle $\vect{m} = \sum_{n=1}^{N} \vect{k}_n \cconv \vect{v}_n$ yields the canonical \emph{signal--crosstalk decomposition}:
+\begin{equation}\label{eq:unbinding_decomposition}
+    \hat{\vect{v}}_q = \vect{k}_q \ccorr \vect{m}
+    = \underbrace{\vect{k}_q \ccorr (\vect{k}_q \cconv \vect{v}_q)}_{\text{self-retrieval signal } \vect{s}_q}
+    + \underbrace{\sum_{\substack{n=1 \\ n \neq q}}^{N} \vect{k}_q \ccorr (\vect{k}_n \cconv \vect{v}_n)}_{\text{crosstalk interference } \vect{\eta}_q}.
+\end{equation}
+Transforming~\eqref{eq:unbinding_decomposition} into the frequency domain via Lemma~\ref{lem:ccorr_props} exposes the exact mechanism of retrieval fidelity:
+\begin{equation}\label{eq:unbinding_freq}
+    \hat{\vect{V}}_q = \conj{\vect{K}}_q \hadamard \vect{M}
+    = \underbrace{\left(\abs{\vect{K}_q}^{\hadamard 2} \hadamard \vect{V}_q\right)}_{\vect{S}_q}
+    + \underbrace{\sum_{\substack{n=1 \\ n \neq q}}^{N} \left(\conj{\vect{K}}_q \hadamard \vect{K}_n \hadamard \vect{V}_n\right)}_{\vect{H}_q},
+\end{equation}
+where $\big(\abs{\vect{K}_q}^{\hadamard 2}\big)_\omega = \abs{K_{q,\omega}}^2$.
+Equation~\eqref{eq:unbinding_freq} immediately explains why unitary keys ($\vect{K}_q \in \mathbb{T}^D$) are algebraically optimal: when $\abs{K_{q,\omega}} = 1$ for every frequency bin $\omega$, the self-retrieval term simplifies identically to $\vect{S}_q = \vect{V}_q$ with zero self-distortion.
+By contrast, for non-unitary keys (such as Gaussian vectors in real HRR), fluctuations in $\abs{K_{q,\omega}}^2$ around $1$ inject an additional \emph{self-distortion error} $(\abs{\vect{K}_q}^{\hadamard 2} - \vect{1}) \hadamard \vect{V}_q$.
+While exact spectral inversion $(K_{q,\omega})^{-1}$ eliminates self-distortion, it amplifies noise catastrophically whenever $\abs{K_{q,\omega}} \approx 0$; practical non-unitary implementations therefore employ either unitary projection or Wiener/ridge-regularized decoding $\conj{K}_{q,\omega} / (\abs{K_{q,\omega}}^2 + \gamma)$ with damping $\gamma > 0$.
+Figure~\ref{fig:algebra} summarizes the complete complex phase-space write and read pipeline.
+
+\begin{figure}[tbp]
+    \centering
+    \input{figures/fig_algebra}
+    \caption{Algebraic operations in complex phase space $\C^D$. \emph{Top (Write Path):} Key--value pairs $(\vect{k}_n, \vect{v}_n)$ are transformed into phasors $(\vect{K}_n, \vect{V}_n) \in \mathbb{T}^D$, bound via elementwise Hadamard phase addition ($\cconv \leftrightarrow \hadamard$), and superposed into a single constant-size trace $\vect{M}$. \emph{Bottom (Read Path):} Querying $\vect{M}$ with the phase conjugate $\conj{\vect{K}}_q$ executes circular correlation $\ccorr$, recovering the exact target signal $\vect{V}_q$ perturbed by additive crosstalk $\vect{H}_q$ (time-domain $\vect{\eta}_q$), which is subsequently denoised against a codebook $\mathcal{V}$ via clean-up readout.}
+    \label{fig:algebra}
+\end{figure}
+
+\begin{remark}[Relation to Sutherland's Complex Correlation Matrix]\label{rem:sutherland_matrix}
+In classical 1990s HNNs~\cite{SUTHERLAND_1990_HNN}, stimulus--response associations $\{(\vect{k}_n, \vect{v}_n)\}_{n=1}^N$ with $\vect{k}_n \in \C^{D_k}$ and $\vect{v}_n \in \C^{D_v}$ are enfolded into a full complex outer-product correlation matrix $\mat{X} = \sum_{n=1}^{N} \vect{v}_n \vect{k}_n\herm \in \C^{D_v \times D_k}$, and recalled via linear projection:
+\begin{equation}\label{eq:sutherland_recall}
+    \hat{\vect{v}}_q = \frac{1}{\norm{\vect{k}_q}_2^2} \mat{X} \vect{k}_q
+    = \vect{v}_q + \sum_{\substack{n=1 \\ n \neq q}}^{N} \frac{\inner{\vect{k}_n}{\vect{k}_q}}{\norm{\vect{k}_q}_2^2} \vect{v}_n.
+\end{equation}
+Comparing~\eqref{eq:sutherland_recall} with~\eqref{eq:unbinding_decomposition}, circular convolution binding restricts the $\bigo{D^2}$ dense correlation matrix $\mat{X}$ to a circulant linear operator parameterized by just $\bigo{D}$ numbers (the vector $\vect{m}$), trading $\bigo{D}$ storage reduction for an extra factor of $D$ reduction in total matrix capacity while preserving the identical additive crosstalk structure.
+\end{remark}
+
+% ------------------------------------------------------------------------------
+\subsection{Crosstalk Noise Analysis and Capacity Bounds}\label{sec:math:capacity}
+% ------------------------------------------------------------------------------
+
+Because $N$ bound pairs share the same $D$-dimensional substrate, retrieval accuracy is governed by the statistical balance between the coherent target signal and the incoherent crosstalk term $\vect{\eta}_q$ (or $\vect{H}_q$).
+We now derive exact second-order moments, the $\SNR$ scaling law, and the resulting clean-up retrieval capacity bound~\cite{PLATE_1995_HRR,FRADY_CAPACITY_VSA}.
+
+\begin{theorem}[Crosstalk Statistics and $\SNR$ Scaling Law]\label{thm:snr_capacity}
+Suppose $N \ge 1$ key--value pairs are stored via uniform superposition in a $D$-dimensional holographic trace, and retrieval is queried with key $q \in \{1, \dots, N\}$ and scored against both the ground-truth value and an independent distractor item from a codebook $\mathcal{V}$.
+\begin{enumerate}
+    \item \textbf{Unitary Complex Phasors (FHRR on $\mathbb{T}^D$):}
+    Let $\{\vect{K}_n\}_{n=1}^N$, $\{\vect{V}_n\}_{n=1}^N$, and an unstored distractor $\vect{V}' \notin \{\vect{V}_n\}_{n=1}^N$ be mutually independent on $\mathbb{T}^D$ with i.i.d.\ uniform phases in $[-\pi, \pi)$.
+    Define the match score $S_q \coloneqq s(\vect{V}_q, \hat{\vect{V}}_q) = \frac{1}{D}\Real\inner{\vect{V}_q}{\hat{\vect{V}}_q}$ and distractor score $S' \coloneqq s(\vect{V}', \hat{\vect{V}}_q)$.
+    Then $S_q$ and $S'$ are uncorrelated with exact moments
+    \begin{align}
+        \E[S_q] &= 1, & \Var(S_q) &= \frac{N - 1}{2D}, \label{eq:fhrr_match_var} \\
+        \E[S'] &= 0, & \Var(S') &= \frac{N}{2D}. \label{eq:fhrr_distractor_var}
+    \end{align}
+    Consequently, the target-retrieval and discrimination signal-to-noise ratios satisfy
+    \begin{equation}\label{eq:snr_fhrr}
+        \SNR_{\mathrm{FHRR}}^{\mathrm{match}}
+        \coloneqq \frac{\E[S_q]^2}{\Var(S_q)} = \frac{2D}{N - 1},
+        \qquad
+        \SNR_{\mathrm{FHRR}}^{\mathrm{disc}}
+        \coloneqq \frac{\left(\E[S_q] - \E[S']\right)^2}{\Var(S_q - S')} = \frac{2D}{2N - 1}.
+    \end{equation}
+
+    \item \textbf{Real-Valued Gaussian HRR ($\R^D$):}
+    Let $\{\vect{k}_n\}_{n=1}^N$, $\{\vect{v}_n\}_{n=1}^N$, and an unstored distractor $\vect{v}' \notin \{\vect{v}_n\}_{n=1}^N$ be mutually independent in $\R^D$ with i.i.d.\ entries drawn from $\mathcal{N}(0, D^{-1})$, and define $S_q^{\R} \coloneqq \inner{\vect{v}_q}{\hat{\vect{v}}_q}$ and $S'^{\R} \coloneqq \inner{\vect{v}'}{\hat{\vect{v}}_q}$.
+    Then $\E[S_q^{\R}] = 1$, $\E[S'^{\R}] = 0$, and
+    \begin{equation}\label{eq:hrr_vars}
+        \Var\!\left(S_q^{\R}\right) = \frac{N + 5}{D} + \bigo{D^{-2}},
+        \qquad
+        \Var\!\left(S'^{\R}\right) = \frac{N + 1}{D} + \bigo{D^{-2}},
+    \end{equation}
+    yielding the discrimination scaling
+    \begin{equation}\label{eq:snr_hrr}
+        \SNR_{\mathrm{HRR}}^{\mathrm{disc}}
+        = \frac{D}{2N + 6 + \bigo{D^{-1}}} \;\sim\; \frac{D}{2N}.
+    \end{equation}
+\end{enumerate}
+In both regimes, $\SNR = \Theta(D/N)$, scaling linearly with vector dimensionality $D$ and inversely with the superposition load $N$.
+\end{theorem}
+
+\begin{proof}
+\emph{Part 1 (Unitary FHRR).}
+Because $\abs{K_{q,\omega}} = 1$, the frequency-domain unbinding~\eqref{eq:unbinding_freq} yields $\hat{\vect{V}}_q = \vect{V}_q + \vect{H}_q$, where $H_{q,\omega} = \sum_{n \neq q} e^{i(\phi_{n,\omega} - \phi_{q,\omega} + \psi_{n,\omega})}$.
+Evaluating the normalized match similarity~\eqref{eq:phasor_similarity} gives
+\begin{equation}\label{eq:fhrr_sq_expand}
+    S_q = \frac{1}{D}\Real\inner{\vect{V}_q}{\vect{V}_q + \vect{H}_q}
+    = 1 + \frac{1}{D} \sum_{\omega=0}^{D-1} \sum_{\substack{n=1 \\ n \neq q}}^{N} \cos\!\left(\Delta_{q,n,\omega}\right),
+\end{equation}
+where $\Delta_{q,n,\omega} = \left(\phi_{n,\omega} - \phi_{q,\omega} + \psi_{n,\omega} - \psi_{q,\omega}\right) \bmod 2\pi$.
+Conditioned on $(\vect{K}_q, \vect{V}_q)$, shifting i.i.d.\ uniform angles $(\phi_{n,\omega} + \psi_{n,\omega}) \bmod 2\pi$ by the fixed offset $-(\phi_{q,\omega} + \psi_{q,\omega})$ leaves the $D(N-1)$ random variables $\{\Delta_{q,n,\omega}\}$ mutually independent and uniform on $[-\pi, \pi)$---hence also unconditionally independent of $(\vect{K}_q, \vect{V}_q)$.
+Since $\E[\cos\Delta_{q,n,\omega}] = 0$ and $\Var(\cos\Delta_{q,n,\omega}) = \frac{1}{2}$, we obtain $\E[S_q] = 1$ and
+\begin{equation*}
+    \Var(S_q) = \frac{1}{D^2} \cdot D(N - 1) \cdot \frac{1}{2} = \frac{N - 1}{2D}.
+\end{equation*}
+For an independent distractor $\vect{V}' \in \mathbb{T}^D$ with phases $\psi'_\omega$, the overlap decomposes into $DN$ independent uniform-phase cosine terms:
+\begin{equation*}
+    S' = \frac{1}{D}\sum_{\omega=0}^{D-1} \cos(\psi_{q,\omega} - \psi'_\omega)
+       + \frac{1}{D}\sum_{\omega=0}^{D-1}\sum_{n \neq q} \cos\!\left(\phi_{n,\omega} - \phi_{q,\omega} + \psi_{n,\omega} - \psi'_\omega\right),
+\end{equation*}
+giving $\E[S'] = 0$ and $\Var(S') = \frac{DN}{2D^2} = \frac{N}{2D}$.
+To verify $\operatorname{Cov}(S_q, S') = 0$, note that for each $(n, \omega)$ with $n \neq q$, setting $\alpha = \phi_{n,\omega} - \phi_{q,\omega} + \psi_{n,\omega}$ yields
+\begin{equation*}
+    \E\!\left[\cos(\alpha - \psi_{q,\omega})\cos(\alpha - \psi'_\omega)\right]
+    = \frac{1}{2}\E\!\left[\cos(\psi'_\omega - \psi_{q,\omega})\right]
+    + \frac{1}{2}\E\!\left[\cos(2\alpha - \psi_{q,\omega} - \psi'_\omega)\right]
+    = 0,
+\end{equation*}
+because $\psi'_\omega$ is independent of both $\psi_{q,\omega}$ and $\alpha$.
+Hence $\Var(S_q - S') = \Var(S_q) + \Var(S') = \frac{2N - 1}{2D}$, establishing~\eqref{eq:snr_fhrr}.
+
+\medskip
+\noindent\emph{Part 2 (Real Gaussian HRR).}
+By Lemma~\ref{lem:ccorr_props}(3), the real match score splits into a self-energy term and $N-1$ crosstalk inner products:
+\begin{equation*}
+    S_q^{\R} = \norm{\vect{w}_q}_2^2 + \sum_{n \neq q} \inner{\vect{w}_q}{\vect{w}_n},
+    \qquad \vect{w}_n \coloneqq \vect{k}_n \cconv \vect{v}_n.
+\end{equation*}
+For i.i.d.\ entries $k_{n,r}, v_{n,r} \sim \mathcal{N}(0, D^{-1})$, each coordinate $w_{n,j} = \sum_{r=0}^{D-1} k_{n,r} v_{n,(j-r)\bmod D}$ has mean $0$ and covariance $\E[w_{n,j} w_{n,j'}] = D^{-1}\delta_{j,j'}$.
+Thus $\E[\norm{\vect{w}_q}_2^2] = 1$, and by independence across $n$, each crosstalk term $C_n = \inner{\vect{w}_q}{\vect{w}_n}$ ($n \neq q$) satisfies $\E[C_n] = 0$, $\operatorname{Cov}(C_n, C_{n'}) = 0$ for $n \neq n'$, and
+\begin{equation*}
+    \Var(C_n) = \E\!\left[\vect{w}_q\trans \E[\vect{w}_n \vect{w}_n\trans] \vect{w}_q\right]
+    = \frac{1}{D}\E\!\left[\norm{\vect{w}_q}_2^2\right] = \frac{1}{D}.
+\end{equation*}
+To evaluate the self-term variance $\Var(\norm{\vect{w}_q}_2^2)$, we apply Parseval's identity: $\norm{\vect{w}_q}_2^2 = \frac{1}{D}\sum_{\omega=0}^{D-1} \abs{K_{q,\omega}}^2 \abs{V_{q,\omega}}^2$.
+Because $\vect{k}_q, \vect{v}_q \in \R^D$ are real Gaussian with variance $D^{-1}$, their DFT coefficients satisfy conjugate symmetry ($K_{q,D-\omega} = \conj{K}_{q,\omega}$) and are independent across $\omega \in \{0, \dots, \lfloor D/2 \rfloor\}$.
+For every interior frequency $1 \le \omega < D/2$, $K_{q,\omega}, V_{q,\omega} \sim \mathcal{CN}(0, 1)$, so $\abs{K_{q,\omega}}^2, \abs{V_{q,\omega}}^2 \overset{\text{i.i.d.}}{\sim} \mathrm{Exp}(1)$ with $\E[\abs{K_{q,\omega}}^4] = 2$.
+Each conjugate pair $\{\omega, D-\omega\}$ therefore contributes $2\abs{K_{q,\omega}}^2\abs{V_{q,\omega}}^2$ with variance $4(2\cdot 2 - 1) = 12$.
+Together with the real DC (and Nyquist, if $D$ is even) terms of variance $3\cdot 3 - 1 = 8$, summing over all $D$ bins yields Plate's exact parity-dependent finite-$D$ variance~\cite{PLATE_1995_HRR},
+\begin{equation*}
+    \Var\!\left(\norm{\vect{w}_q}_2^2\right) = \frac{6}{D} + \frac{2 + 2\,\mathbf{1}_{\{D\text{ even}\}}}{D^2} = \frac{6}{D} + \bigo{D^{-2}}.
+\end{equation*}
+Adding the $N-1$ uncorrelated crosstalk variances $\frac{N-1}{D}$ yields $\Var(S_q^{\R}) = \frac{N + 5}{D} + \frac{2 + 2\,\mathbf{1}_{\{D\text{ even}\}}}{D^2}$.
+Finally, for an independent distractor $\vect{v}' \sim \mathcal{N}(\vect{0}, D^{-1}\mat{I}_D)$, $\E[S'^{\R}] = 0$ and $\Var(S'^{\R}) = \frac{1}{D}\E[\norm{\hat{\vect{v}}_q}_2^2]$.
+Using~\eqref{eq:unbinding_freq}, interior complex bins satisfy $\E[\abs{\hat{V}_{q,\omega}}^2] = \E[\abs{K_{q,\omega}}^4]\E[\abs{V_{q,\omega}}^2] + (N-1)\cdot 1 = N + 1$ whereas the real DC/Nyquist bins satisfy $\E[\hat{V}_{q,\omega}^2] = N + 2$, giving the exact finite-$D$ form $\Var(S'^{\R}) = \frac{N+1}{D} + \frac{1 + \mathbf{1}_{\{D\text{ even}\}}}{D^2} = \frac{N+1}{D} + \bigo{D^{-2}}$~\cite{PLATE_1995_HRR}.
+Combining the uncorrelated scores $S_q^{\R}$ and $S'^{\R}$ produces~\eqref{eq:snr_hrr}.
+\end{proof}
+
+Two insights---along with their precise scope conditions---follow from Theorem~\ref{thm:snr_capacity}.
+First, unitary complex phasors (FHRR) achieve a \emph{factor-of-two discrimination $\SNR$ advantage} over real Gaussian HRR at equal ambient dimensionality $D$ ($\frac{D}{N}$ vs.\ $\frac{D}{2N}$), despite requiring only $D$ real phase parameters on $\mathbb{T}^D$: unitary keys eliminate spectral self-distortion completely, while taking the real part in~\eqref{eq:phasor_similarity} rejects the orthogonal imaginary quadrature component of isotropic complex crosstalk noise.
+Crucially, this factor-of-two ($3\,\mathrm{dB}$) gain holds \emph{conditionally under equal expected unit-energy normalization} ($\frac{1}{D}\norm{\vect{V}}_2^2 = 1$ on $\mathbb{T}^D$ matched to $\E[\norm{\vect{v}}_2^2] = 1$ in $\R^D$), \emph{i.i.d.\ circular-symmetric complex-phasor and isotropic real-Gaussian independence assumptions}, and the \emph{phase-coherent real-part readout}~\eqref{eq:phasor_similarity}---not unconditionally across arbitrary score definitions (such as phase-agnostic modulus scoring $\abs{\inner{\vect{V}_q}{\hat{\vect{V}}_q}}$), non-unitary complex keys, or correlated learned embeddings.
+Second, because $\Var(S_q)$ grows linearly with $N$, a raw unbound vector $\hat{\vect{V}}_q$ is intrinsically noisy; exact symbol recovery therefore relies on a \emph{clean-up memory}---a nearest-neighbor projection onto a known codebook $\mathcal{V} = \{\vect{V}^{(1)}, \dots, \vect{V}^{(M)}\}$ (implemented via dot-product search, Hopfield attractors, or iterative resonator networks).
+
+\begin{corollary}[Asymptotic Clean-Up Retrieval Capacity]\label{cor:cleanup_capacity}
+Let $\mathcal{V} \subset \mathbb{T}^D$ be a random codebook of $M \ge N$ mutually independent i.i.d.\ uniform-phase codewords, and suppose a unitary FHRR trace superposes $N$ mutually independent keys $\{\vect{K}_n\}_{n=1}^N \subset \mathbb{T}^D$ bound to $N$ distinct values $\{\vect{V}_n\}_{n=1}^N$ sampled without replacement from $\mathcal{V}$.
+Consider retrieving a queried value $\vect{V}_q$ via maximum-similarity clean-up, $\hat{\vect{V}}_{\mathrm{clean}} = \arg\max_{\vect{V} \in \mathcal{V}} s(\vect{V}, \hat{\vect{V}}_q)$.
+Under the asymptotic high-dimensional Gaussian (CLT) approximation ($D \gg 1$ with $\ln M = o(D)$), the probability of misretrieval $P_{\mathrm{err}} = \Pr(\hat{\vect{V}}_{\mathrm{clean}} \neq \vect{V}_q)$ is approximated and conservatively upper-bounded by
+\begin{equation}\label{eq:perr_bound}
+    P_{\mathrm{err}} \lesssim \frac{M - 1}{2} \exp\!\left(-\frac{D}{2N - 1}\right).
+\end{equation}
+Consequently, targeting $P_{\mathrm{err}} \le \delta$ for any desired error rate $\delta \in (0, 1)$ yields the asymptotic capacity scaling
+\begin{equation}\label{eq:capacity_bound}
+    N_{\max}(D, M, \delta) \approx \frac{D}{2 \ln\!\left(\frac{M - 1}{2\delta}\right)} + \frac{1}{2}
+    = \Theta\!\left(\frac{D}{\ln(M / \delta)}\right).
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+By the union bound over the $M - 1$ non-target codebook items $\vect{V}^{(m)} \neq \vect{V}_q$,
+\begin{equation*}
+    P_{\mathrm{err}} = \Pr\!\left(\bigcup_{m \neq q} \left\{ S^{(m)} \ge S_q \right\}\right)
+    \le \sum_{m \neq q} \Pr\!\left(S_q - S^{(m)} \le 0\right).
+\end{equation*}
+Under mutual independence and distinct-value sampling ($\vect{V}_{n^*} \neq \vect{V}_q$ for $n^* \neq q$), the score statistics and zero-covariance property $\operatorname{Cov}(S_q, S^{(m)}) = 0$ hold identically whether $\vect{V}^{(m)}$ is one of the $M - N$ unstored distractors or one of the $N - 1$ in-bundle distractors $\vect{V}_{n^*}$ ($n^* \neq q$), because the self-key residual $e^{i(\phi_{n^*,\omega} - \phi_{q,\omega} + \psi_{n^*,\omega} - \psi_{n^*,\omega})} = e^{i(\phi_{n^*,\omega} - \phi_{q,\omega})}$ retains an independent uniform phase while remaining uncorrelated with $\psi_{n^*,\omega} - \psi_{q,\omega}$.
+For $D \gg 1$, the Central Limit Theorem implies $S_q - S^{(m)} \overset{d}{\approx} \mathcal{N}\!\left(1, \sigma_\Delta^2\right)$ with $\sigma_\Delta^2 = \Var(S_q - S^{(m)}) = \frac{2N - 1}{2D}$ from Theorem~\ref{thm:snr_capacity}.
+Applying the standard Gaussian tail bound $\Phi(-z) \le \frac{1}{2}e^{-z^2/2}$ at $z = \sigma_\Delta^{-1} = \sqrt{\frac{2D}{2N - 1}}$ gives
+\begin{equation*}
+    \Pr\!\left(S_q - S^{(m)} \le 0\right)
+    \approx \Phi\!\left(-\frac{1}{\sigma_\Delta}\right)
+    \le \frac{1}{2} \exp\!\left(-\frac{1}{2\sigma_\Delta^2}\right)
+    = \frac{1}{2} \exp\!\left(-\frac{D}{2N - 1}\right).
+\end{equation*}
+Multiplying by $M - 1$ yields~\eqref{eq:perr_bound}, and solving $\frac{M-1}{2}\exp\!\left(-\frac{D}{2N-1}\right) \le \delta$ for $N$ produces~\eqref{eq:capacity_bound}.
+(Note that~\eqref{eq:perr_bound}--\eqref{eq:capacity_bound} are conservative in two respects: $\Phi(-z) \le \frac{1}{2}e^{-z^2/2}$ carries a factor-of-$1/2$ pre-exponential constant rather than Mills' ratio $(\sqrt{2\pi}\,z)^{-1}$, and applying a union bound across pairwise events $\{S^{(m)} \ge S_q\}$ that share $S_q$ introduces up to a factor-of-$2$ conservatism in~\eqref{eq:capacity_bound} for large $M$ relative to the conditional extreme-value retrieval integral $P_{\mathrm{err}} = 1 - \E_{S_q}\!\bigl[\Phi(S_q / \sigma_d)^{M-1}\bigr]$ of Frady et al.~\cite{FRADY_CAPACITY_VSA}, under which $N_{\max} \sim D / \bigl(\sqrt{\ln M} + \sqrt{\ln(1/\delta)}\bigr)^2$.)
+\end{proof}
+
+Corollary~\ref{cor:cleanup_capacity} highlights a logarithmic resilience to dictionary size: storing $N$ structured bindings reliably requires dimension $D$ to grow only \emph{linearly} in $N$ and \emph{logarithmically} in codebook size $M$.
+For instance, at $D = 4096$, the asymptotic estimate~\eqref{eq:capacity_bound} indicates that a single unitary phasor trace can superpose $N \approx 100$ key--value bindings drawn from a vocabulary of $M = 10^5$ symbols with per-query error probability below $10^{-3}$.
+We emphasize, however, that~\eqref{eq:perr_bound}--\eqref{eq:capacity_bound} are \emph{asymptotic high-dimensional Gaussian approximations} derived via the Central Limit Theorem rather than unconditional finite-sample concentration guarantees: at small $D$ or extreme codebook sizes where tail probabilities probe the non-Gaussian support of bounded cosine sums, rigorous finite-sample bounds require non-asymptotic Chernoff/Hoeffding or Berry--Esseen corrections with looser constants.
+
+Equally important, this asymptotic capacity scaling rests critically on key quasi-orthogonality ($\E[\inner{\vect{K}_n}{\vect{K}_q}] = 0$).
+When keys are learned end-to-end by deep neural encoders rather than sampled i.i.d., semantic clustering introduces non-zero cross-correlations $\rho_{qn} = s(\vect{K}_q, \vect{K}_n) \neq 0$, injecting a coherent bias $\sum_{n \neq q} \rho_{qn} \vect{V}_n$ whose interference power scales as $\bigo{N^2 \bar{\rho}^2}$ alongside the $\bigo{N/D}$ incoherent crosstalk variance.
+Consequently, correlated keys depress the effective discrimination $\SNR$ strictly below the i.i.d.\ $(N/D)^{-1}$ upper envelope and accelerate retrieval-error growth well before the theoretical ceiling $N_{\max}$.
+Mitigating correlated-key interference---through spectral whitening, phase-orthogonalization regularizers, or iterative error-correcting updates (analogous to Delta-rule / Sutherland iterative folding)---remains a central algorithmic bridge between classical VSA theory and modern deep learning, as examined in Sections~\ref{sec:history} and~\ref{sec:potentials}.
+Figure~\ref{fig:capacity} corroborates Theorem~\ref{thm:snr_capacity} empirically via Monte Carlo simulation across dimensions $D \in \{256, 1024, 4096\}$ (full reproducible script provided in Appendix~\ref{app:simulation}) and juxtaposes the resulting capacity law against the memory-footprint scaling of classical HNNs, KV-caches, and dense self-attention; since clean-up error scales exponentially in $-\frac{1}{2}\SNR^{\mathrm{disc}}$ via~\eqref{eq:perr_bound}, the $2\times$ vertical $\SNR$ separation in panel~(a) directly translates into roughly double the reliable superposition load $N_{\max}$ at fixed $(D, M, \delta)$.
+
+\begin{figure}[tbp]
+    \centering
+    \input{figures/fig_capacity}
+    \caption{Theoretical capacity and memory-scaling trade-offs. \textbf{(a)}~Empirical Monte Carlo discrimination $\SNR^{\mathrm{disc}}$ (reproducible via \texttt{figures/simulate\_capacity.py}, listed in full in Appendix~\ref{app:simulation}) overlaid on the analytical asymptotes of Theorem~\ref{thm:snr_capacity} across $D \in \{256, 1024, 4096\}$: under i.i.d.\ unit-energy normalization, unitary FHRR tracks $(N/D)^{-1}$ cleanly across all scales, whereas real Gaussian HRR incurs both an asymptotic $2\times$ ($3\,\mathrm{dB}$) penalty and finite-$D$ self-distortion at small $N$ (visible at $D=256$). Under Corollary~\ref{cor:cleanup_capacity}, clean-up retrieval error scales as $P_{\mathrm{err}} \lesssim \frac{M-1}{2}\exp(-\frac{1}{2}\SNR^{\mathrm{disc}})$, so this $2\times$ $\SNR$ gap yields roughly double the reliable load $N_{\max}$ at fixed $(D,M,\delta)$; conversely, semantically correlated learned keys ($\rho_{qn} \neq 0$) introduce $\bigo{N^2\bar{\rho}^2}$ coherent interference, pushing effective $\SNR$ below these i.i.d.\ upper envelopes and steepening retrieval-error scaling. \textbf{(b)}~State memory footprint at $D=4096$: a holographic superposition trace remains constant at $2D$ real scalars ($\bigo{1}$ in $N$), whereas KV-caches grow linearly ($2ND$, overtaking a dense HNN correlation matrix $2D^2$ at $N=D$) and dense attention matrices grow quadratically ($N^2$, overtaking KV-caches at $N=2D$).}
+    \label{fig:capacity}
+\end{figure}
