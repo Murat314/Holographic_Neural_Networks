@@ -29,6 +29,12 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 
 **Important:** Proposed constant-size holographic memory modules are conceptual research directions, not experimentally established drop-in replacements for Transformer KV caches. The fixed-size trace trades storage growth for interference and finite retrieval capacity.
 
+## Animated explainer
+
+In a field-drone scenario, the animation compares a growing key–value cache with a fixed-size Fourier holographic trace. It shows phase binding, superposition, retrieval, and how the memory can abstain when a query has no strong match. The demo uses illustrative memory, latency, and hardware fault parameters.
+
+![Animated field-drone example comparing a key–value cache with fixed-size holographic memory](assets/hnn_explainer.gif)
+
 ## Repository structure
 
 ```text
