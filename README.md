@@ -29,6 +29,12 @@ The paper develops a common complex-phasor framework for binding, bundling, and 
 
 **Important:** Proposed constant-size holographic memory modules are conceptual research directions, not experimentally established drop-in replacements for Transformer KV caches. The fixed-size trace trades storage growth for interference and finite retrieval capacity.
 
+## Animated explainer
+
+The animation illustrates the trade-off described in Section 2.3. A growing stack of separate records is compared with a fixed-size holographic memory, where interference can cause recall errors as more pairs are added.
+
+![Animated comparison of a growing stack of key–value records and a fixed-size holographic memory grid](assets/hnn_explainer.gif)
+
 ## Repository structure
 
 ```text
